@@ -18,38 +18,55 @@ var numOfFilesKeptInDropzone = 0;
 var filesArray = [];
 const maxNumOfFiles = 1;
 var toAddFile = false;
+var toRemoveFile = false;
+
 var uploadButton = $('button#uploadToServer');
 var hintMessage = $('h1#hint_message');
+var chooseFileButton = $('button#clickable');
+var hiddenDiv = $('div#hidden_area');
+
 var numBodyClicked = 0; 
+
 	function dropAndClickEventHandler(event) {
 		
 		//to solve an bug that body's click would be triggered twice within an click event		
-		numBodyClicked++;
-		if(event.type === click_EVENT && numBodyClicked === 2) { 
-			numBodyClicked = 0;
-			return;
-		}
+		// numBodyClicked++;
+		// if(event.type === click_EVENT && numBodyClicked === 2) { 
+		// 	numBodyClicked = 0;
+		// 	return;
+		// }
+		//console.log(event);
 
-		console.log(event);
-		
 		if(numOfFilesKeptInDropzone == maxNumOfFiles) {
 			if(confirm("You're going to replace current file on this page.\nDo you want to do this?") == true) { //pressed OK
-				this.removeFile(filesArray.pop());
+				toRemoveFile = true;
 				toAddFile = true;
+				if(event.type === click_EVENT) {
+					hiddenDiv.trigger(click_EVENT); //after this event would trigger addedFile
+				}
 			}
 			else { //pressed cancel
+				toRemoveFile = false;
 				toAddFile = false;
 			}
 		}
 		else {
+			toRemoveFile = false;
 			toAddFile = true;
+			if(event.type === click_EVENT) {
+				hiddenDiv.trigger(click_EVENT); //after this event would trigger addedFile
+			}
 		}
 		
 	}
 
+
+	chooseFileButton.on(click_EVENT, dropAndClickEventHandler);
+
 	var slidesDropzone = new Dropzone(document.body,
 		{ 
-			clickable: true,
+			//clickable: false,
+			clickable: "div#hidden_area", // Define the element that should be used as click trigger to select files.
 			paramName: "file",
 			url: "/file/upload",
 			maxFilesize: 2, //in MB
@@ -66,23 +83,25 @@ var numBodyClicked = 0;
 			
 			init: function() {
 				
-				
 				this
 				.on(drop_EVENT, dropAndClickEventHandler)
 			    .on(addedFile_EVENT, function(file) { 
+			    	
+			    	if(toRemoveFile) {
+			    		this.removeFile(filesArray.pop()); //trigger removeFile event and update UI
+			    	}
+
 			    	if(toAddFile) {
 				    	filesArray.push(file);
 			    	}
-			    	else {
-			    		this.removeFile(file);
-			    	}
+			    	
 			    	//in second branch would be offset in the below event handler
 			    	numOfFilesKeptInDropzone++;
 			    	if(numOfFilesKeptInDropzone > 0) {
 			    		uploadButton.css(display_CSSProperty,inlineBlock_CSSValue);
 			    		hintMessage.css(display_CSSProperty,none_CSSValue);
 			    	}
-			    	
+
 			    })
 			    .on(removedfile_EVENT, function() { 
 			    	numOfFilesKeptInDropzone--; 
@@ -107,12 +126,10 @@ var numBodyClicked = 0;
 			},
 			
 			addRemoveLinks: true,
-			previewsContainer: "#previews", // Define the container to display the previews,
-			//clickable: "#clickable" // Define the element that should be used as click trigger to select files.
+			previewsContainer: "#previews" // Define the container to display the previews,
+			
 		}
 	);
-
-	$('body.dz-clickable').on(click_EVENT, dropAndClickEventHandler);
 
 	uploadButton.css(display_CSSProperty,none_CSSValue).on(click_EVENT,function (event){
 		slidesDropzone.processQueue();
@@ -123,5 +140,5 @@ var numBodyClicked = 0;
 	$(document).bind('drop dragover', function (e) {
     	e.preventDefault();
 	});
-	
+
 })();
