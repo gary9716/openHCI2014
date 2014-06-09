@@ -6,7 +6,7 @@ var path = require('path');
 
 //paths
 var frontEndPath = __dirname + '/../public';
-var port = 5000;
+var port = process.env.PORT || 5000;
 var form = new formidable.IncomingForm();
 	form.encoding = 'utf-8';
 	form.uploadDir = path.resolve(__dirname + '/../filesFolder');
