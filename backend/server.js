@@ -1,27 +1,9 @@
-//var mongoose = require('mongoose');
 var mongo = require('mongodb');
 var MongoClient = mongo.MongoClient;
 var Grid = require('gridfs-stream');
 var mongodb_uri = process.env.MONGOLAB_URI || 'mongodb://localhost/test';
 
 console.log(mongodb_uri);
-
-/*
-var connection = mongoose.createConnection(mongodb_uri);
-
-// Error handler
-connection.on('error', function(err){
-  console.log(err);
-});
-
-// Connection established
-connection.once('open', function() {
-	console.log('database connection established');
-	gfs = Grid(connection.db,mongoose.mongo);
-	serverStartToListen();
-});
-
-*/
 
 MongoClient.connect(mongodb_uri, function(err, db) {
 	if(err) {
@@ -40,7 +22,6 @@ var fileOptions = {
     mode: 'w', // default value: w+, possible options: w, w+ or r, see [GridStore](http://mongodb.github.com/node-mongodb-native/api-generated/gridstore.html)
     root: 'registerdata'
 };
-
 
 
 var express = require('express'); 
@@ -87,6 +68,7 @@ else {
 	console.log('s3 is available');
 	s3_isAvailable = true;
 	//form.uploadDir = __dirname + '/tmp';
+	//using default upload path
 	s3_client = require('knox').createClient({
 	    key: s3_access_key_id
 	  , secret: s3_secret_access_key
@@ -137,6 +119,7 @@ form.on('file', function(field, file) {
 		writestream.on('close', function (file) {
 		  // do something with `file`
 		  console.log('upload successfully:' + file.filename);
+		  global_res.end("upload complete");
 		});
     });
 	/*
@@ -151,6 +134,7 @@ app.get("/uploadFile",function (req,res) {
 	res.sendfile(uploadFileHtmlPath);
 })
 .get("/file/download/:fileName",function (req,res) {
+	
 	if(!s3_isAvailable) {
 		res.download(form.uploadDir + "/" + req.params.fileName,
 					 req.params.fileName,
@@ -162,11 +146,27 @@ app.get("/uploadFile",function (req,res) {
 		);
 	}
 	else { 
-		s3_client.getFile(req.params.fileName, function (err,res) {
-			console.log(res);
-			res.resume();
+		// s3_client.getFile(req.params.fileName, function (err,res) {
+		// 	console.log(res);
+		// 	res.resume();
+		// });
+		
+		gfs.exist(options, function (err, found) {
+		  if (err) {
+		  	res.send(400,{ error:'error happened when checking file existed or not' });
+		  }
+		  if(found) {
+		  	fileOptions.filename = req.params.fileName;
+		  	var readstream = gfs.createReadStream(fileOptions);
+			readstream.pipe(res);
+		  }
+		  else {
+		  	res.send(400,{ error:'file didn\'t exist' });	
+		  }
 		});
 	}
+	
+
 })
 .post("/file/upload",function (req,res) {
 	console.log("start to upload");
@@ -174,7 +174,7 @@ app.get("/uploadFile",function (req,res) {
     form.parse(req);
 });
 
-function serverStartToListen() {
+function serverStartToListen() { //wait for DB connection
 	app.listen(port, function(){
 	    console.log('Listening on ' + String(port));
 	});
