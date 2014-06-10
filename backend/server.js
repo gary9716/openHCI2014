@@ -1,9 +1,12 @@
-var mongoose = require('mongoose');
+//var mongoose = require('mongoose');
+var mongo = require('mongodb');
+var MongoClient = mongo.MongoClient;
 var Grid = require('gridfs-stream');
 var mongodb_uri = process.env.MONGOLAB_URI || 'mongodb://localhost/test';
 
 console.log(mongodb_uri);
 
+/*
 var connection = mongoose.createConnection(mongodb_uri);
 
 // Error handler
@@ -11,14 +14,34 @@ connection.on('error', function(err){
   console.log(err);
 });
 
-var gfs;
-
 // Connection established
 connection.once('open', function() {
 	console.log('database connection established');
 	gfs = Grid(connection.db,mongoose.mongo);
 	serverStartToListen();
 });
+
+*/
+
+MongoClient.connect(mongodb_uri, function(err, db) {
+	if(err) {
+		throw err;
+	}
+	console.log('database connection established');
+	gfs = Grid(db,mongo);
+	serverStartToListen();
+
+});
+
+var gfs;
+var fileOptions = {
+	//_id: null, // a MongoDb ObjectId
+    filename: null, // a filename
+    mode: 'w', // default value: w+, possible options: w, w+ or r, see [GridStore](http://mongodb.github.com/node-mongodb-native/api-generated/gridstore.html)
+    root: 'registerdata'
+};
+
+
 
 var express = require('express'); 
 var fs = require('fs');
@@ -63,7 +86,7 @@ if(!s3_access_key_id || !s3_secret_access_key || !s3_username || !s3_password ||
 else {
 	console.log('s3 is available');
 	s3_isAvailable = true;
-	form.uploadDir = __dirname + '/tmp';
+	//form.uploadDir = __dirname + '/tmp';
 	s3_client = require('knox').createClient({
 	    key: s3_access_key_id
 	  , secret: s3_secret_access_key
@@ -76,6 +99,7 @@ var global_res;
 
 form.on('file', function(field, file) {
         //rename the incoming file to the file's local name
+        /*
         var newFileNameAndPath = form.uploadDir + "/" + file.name;
         fs.rename(file.path, newFileNameAndPath,function (err) {
 			console.log('file rename to:' + file.name);
@@ -105,12 +129,22 @@ form.on('file', function(field, file) {
         	}
       	
         });
-    })
+		*/
+		//fileOptions._id = 
+		fileOptions.filename = file.name;
+		var writestream = gfs.createWriteStream(fileOptions);
+		fs.createReadStream(file.path).pipe(writestream);
+		writestream.on('close', function (file) {
+		  // do something with `file`
+		  console.log('upload successfully:' + file.filename);
+		});
+    });
+	/*
 	.on('end', function() {
 		console.log('file uploading finished here');
 		return;
 	});
-
+	*/
 
 //http routing
 app.get("/uploadFile",function (req,res) {
