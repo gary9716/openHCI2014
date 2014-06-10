@@ -1,3 +1,25 @@
+var mongoose = require('mongoose');
+var Grid = require('gridfs-stream');
+var mongodb_uri = process.env.MONGOLAB_URI || 'mongodb://localhost/test';
+
+console.log(mongodb_uri);
+
+var connection = mongoose.createConnection(mongodb_uri);
+
+// Error handler
+connection.on('error', function(err){
+  console.log(err);
+});
+
+var gfs;
+
+// Connection established
+connection.once('open', function() {
+	console.log('database connection established');
+	gfs = Grid(connection.db,mongoose.mongo);
+	serverStartToListen();
+});
+
 var express = require('express'); 
 var fs = require('fs');
 var formidable = require('formidable');
@@ -116,7 +138,10 @@ app.get("/uploadFile",function (req,res) {
 	console.log("start to upload");
 	global_res = res;
     form.parse(req);
-})
-.listen(port, function(){
-    console.log('Listening on ' + String(port));
 });
+
+function serverStartToListen() {
+	app.listen(port, function(){
+	    console.log('Listening on ' + String(port));
+	});
+}

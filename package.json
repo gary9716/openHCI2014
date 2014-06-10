@@ -18,6 +18,9 @@
     "logfmt": "~1.1.2",
     "aws-sdk": "~2.0.0-rc.19",
     "intimidate": "~0.1.2",
-    "knox": "~0.8.10"
+    "knox": "~0.8.10",
+    "mongoose": "~3.8.12",
+    "mongodb": "~1.4.5",
+    "gridfs-stream": "~0.5.1"
   }
 }
