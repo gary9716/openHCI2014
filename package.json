@@ -15,6 +15,9 @@
   "dependencies": {
     "formidable": "~1.0.14",
     "express": "~3.10.3",
-    "logfmt": "~1.1.2"
+    "logfmt": "~1.1.2",
+    "aws-sdk": "~2.0.0-rc.19",
+    "intimidate": "~0.1.2",
+    "knox": "~0.8.10"
   }
 }

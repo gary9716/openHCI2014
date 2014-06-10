@@ -1,6 +1,6 @@
 (function (){
-//var host = 'http://localhost:5000';
-var host = 'http://openhci2014.herokuapp.com'
+var host = window.location.origin;
+//var host = 'http://openhci2014.herokuapp.com'
 
 var drop_EVENT = "drop";
 var addedFile_EVENT = "addedfile";
@@ -15,17 +15,13 @@ var none_CSSValue = 'none';
 var inlineBlock_CSSValue = 'inline-block';
 
 var numOfFilesKeptInDropzone = 0;
-var filesArray = [];
 const maxNumOfFiles = 1;
 var toAddFile = false;
 var toRemoveFile = false;
-
 var uploadButton = $('button#uploadToServer');
 var hintMessage = $('h1#hint_message');
 var chooseFileButton = $('button#clickable');
 var hiddenDiv = $('div#hidden_area');
-
-var numBodyClicked = 0; 
 
 	function dropAndClickEventHandler(event) {
 		
@@ -35,9 +31,8 @@ var numBodyClicked = 0;
 		// 	numBodyClicked = 0;
 		// 	return;
 		// }
-		//console.log(event);
 
-		if(numOfFilesKeptInDropzone == maxNumOfFiles) {
+		if(slidesDropzone.files.length == maxNumOfFiles) {
 			if(confirm("You're going to replace current file on this page.\nDo you want to do this?") == true) { //pressed OK
 				toRemoveFile = true;
 				toAddFile = true;
@@ -72,6 +67,7 @@ var numBodyClicked = 0;
 			maxFilesize: 2, //in MB
 			maxFiles: maxNumOfFiles,
 			autoProcessQueue: false, //have to call dropzone.processQueue() myself
+			uploadMultiple: false,
 			/*
 				The default implementation of accept checks the file's 
 				mime type or extension against this list. 
@@ -86,31 +82,31 @@ var numBodyClicked = 0;
 				this
 				.on(drop_EVENT, dropAndClickEventHandler)
 			    .on(addedFile_EVENT, function(file) { 
-			    	
+
 			    	if(toRemoveFile) {
-			    		this.removeFile(filesArray.pop()); //trigger removeFile event and update UI
+			    		this.removeFile(this.files[0]); //trigger removeFile event and update UI
 			    	}
 
-			    	if(toAddFile) {
-				    	filesArray.push(file);
+			    	if(!toAddFile) {
+			    		this.removeFile(file);
 			    	}
 			    	
 			    	//in second branch would be offset in the below event handler
-			    	numOfFilesKeptInDropzone++;
-			    	if(numOfFilesKeptInDropzone > 0) {
+			    	
+			    	if(this.files.length > 0) {
 			    		uploadButton.css(display_CSSProperty,inlineBlock_CSSValue);
 			    		hintMessage.css(display_CSSProperty,none_CSSValue);
 			    	}
 
 			    })
-			    .on(removedfile_EVENT, function() { 
-			    	numOfFilesKeptInDropzone--; 
-			    	if(numOfFilesKeptInDropzone === 0) {
+			    .on(removedfile_EVENT, function(file) { 
+
+			    	if(this.files.length === 0) {
 			    		uploadButton.css(display_CSSProperty,none_CSSValue);
 			    		hintMessage.css(display_CSSProperty,inlineBlock_CSSValue);
 			    	}
 			    })
-			    .on(success_EVENT, function() {
+			    .on(success_EVENT, function(file) {
 			    	//console.log('done-uploading');
 			    	var template = '<a class="dz-remove" style="margin-top:5px;">download</a>';
 					$(template).appendTo('div.dz-preview').on(click_EVENT,function (event){
@@ -133,7 +129,6 @@ var numBodyClicked = 0;
 
 	uploadButton.css(display_CSSProperty,none_CSSValue).on(click_EVENT,function (event){
 		slidesDropzone.processQueue();
-		//slidesDropzone.removeAllFiles();
 	});
 	
 	//disable browser's default event
