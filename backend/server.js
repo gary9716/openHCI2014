@@ -151,21 +151,21 @@ app.get("/uploadFile",function (req,res) {
 		// 	res.resume();
 		// });
 		
-		gfs.exist({ filename:req.params.fileName,root: 'registerdata' }, function (err, found) {
-		  if (err) {
-		  	res.send(400,{ error:'error happened when checking file existed or not' });
-		  }
-		  if(found) {
-		  	var readstream = gfs.createReadStream({ filename:req.params.fileName,root: 'registerdata' });
-			readstream.pipe(res);
-		  }
-		  else {
-		  	res.send(400,{ error:'file didn\'t exist' });	
-		  }
-		});
+		// gfs.exist({ filename:req.params.fileName,root: 'registerdata' }, function (err, found) {
+		//   if (err) {
+		//   	res.send(400,{ error:'error happened when checking file existed or not' });
+		//   }
+		//   if(found) {
+		//   	var readstream = gfs.createReadStream({ filename:req.params.fileName,root: 'registerdata' });
+		// 	readstream.pipe(res);
+		//   }
+		//   else {
+		//   	res.send(400,{ error:'file didn\'t exist' });	
+		//   }
+		// });
 
-		// var readstream = gfs.createReadStream({ filename:req.params.fileName });
-		// readstream.pipe(res);
+		var readstream = gfs.createReadStream({ filename:req.params.fileName,root: 'registerdata' });
+		readstream.pipe(res);
 	}
 	
 
