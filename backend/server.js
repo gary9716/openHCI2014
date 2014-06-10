@@ -150,13 +150,12 @@ app.get("/uploadFile",function (req,res) {
 		// 	console.log(res);
 		// 	res.resume();
 		// });
-		
-		gfs.exist(options, function (err, found) {
+		fileOptions.filename = req.params.fileName;
+		gfs.exist(fileOptions, function (err, found) {
 		  if (err) {
 		  	res.send(400,{ error:'error happened when checking file existed or not' });
 		  }
 		  if(found) {
-		  	fileOptions.filename = req.params.fileName;
 		  	var readstream = gfs.createReadStream(fileOptions);
 			readstream.pipe(res);
 		  }
