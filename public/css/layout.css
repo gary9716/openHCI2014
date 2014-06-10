@@ -186,7 +186,7 @@ ul#nav li.current a { color: #F06000; }
 /* ------------------------------------------------------------------ */
 
 #about {
-   background: #22313F url(../images/gplaypattern_transparent.png);
+   background: #F2F1EF url(../images/gplaypattern_transparent.png);
    /*background-image: url(../images/tex2res4.png);*/
    /*background: #2B2B2B;*/
    padding-top: 96px;
@@ -194,17 +194,20 @@ ul#nav li.current a { color: #F06000; }
    overflow: hidden;
 }
 
-#about a, #about a:visited  { color: #fff; }
-#about a:hover, #about a:focus { color: #11ABB0; }
+#about a.red, #about a.red:visited  { color: #E26A6A; }
+#about a.red:hover, #about a.red:focus { color: #11ABB0; }
 
 #about h2 {
    font: 22px/30px 'opensans-bold', sans-serif;
-   color: #fff;
+   color: #2C3E50;
    margin-bottom: 12px;
+   margin-top: 10px;
+   border-top: 2px solid #DADFE1;
+   border-bottom: 3px solid #65C6BB;
 }
 #about p {
    line-height: 30px;
-   color: #F2F1EF;
+   color: #2C3E50;
    /*color: #7A7A7A;*/
 }
 #about .profile-pic {

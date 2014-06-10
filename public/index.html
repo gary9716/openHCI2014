@@ -1,31 +1,60 @@
-
-<!--Upload this file to your server-->
-
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
-	<!--Add the title of your typeform below-->
-	<title>2014 Registration</title>
-	
-	<!--CSS styles that ensure your typeform takes up all the available screen space (DO NOT EDIT!)-->
-<style type="text/css">
-		html{
-			margin: 0;
-			height: 100%;
-			overflow: hidden;
-		}
-		iframe{
-			position: absolute;
-			left:0;
-			right:0;
-			bottom:0;
-			top:0;
-			border:0;
-		}
-	</style>
+	<meta charset="utf-8">
+	<title>OpenHCI 2014 Registration</title>
+	<link rel="stylesheet" href="css/default.css">
+	<link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/media-queries.css">
+	<link rel="shortcut icon" type="image/png" href="/images/favicon.png" >
 </head>
 <body>
-	<iframe id="typeform-full" width="100%" height="100%" frameborder="0" src="https://openhci.typeform.com/to/Yhhmzl?embed=full"></iframe>
-	<script type="text/javascript" src="https://s3-eu-west-1.amazonaws.com/share.typeform.com/embed.js"></script>
+	<!-- Header
+   ================================================== -->
+	 <header id="home">
+	    <div class="logo">
+	       <img src="/images/openhci2014/lagontology.png">
+	    </div>
+	    <div class="row banner">
+	       <div class="banner-text">
+	          <h1 class="responsive-headline">OpenHCI 2014 Registration</h1>
+	          <h3><span>線上報名時間：06 / 13 (五) 晚上 12 點 至 06 / 20 (五) 晚上 12 點前</span></h3>
+						<hr />
+						<div id="previews" class="dropzone-previews"></div>
+						<a href="#about" class="button smoothscroll">開始報名</a>
+	          <hr />
+	       </div>
+	    </div>
+	 </header> <!-- Header End -->
+
+	 <!-- About Section
+   ================================================== -->
+   <section id="about">
+      <div class="row">
+         <div class="three columns">
+            <img class="profile-pic" src="/images/openhci2014/openhci_logo_white.png" alt="" />
+         </div>
+
+         <div class="nine columns main-col">
+            <h2>報名前須知</h2>
+            <p>進入線上報名系統前需準備兩份報名資料，包含「線上問卷」與「iDCard」兩部分：</p>
+            <h1>1. 「線上問卷」</h1>
+            <p>進入報名系統線上作業，包含個人基本資料、教育背景兩部分。</p>
+            <h1>2. 「iDCard」</h1>
+            <p>為一份兩頁之投影片，包含“個人簡歷”與“發想相關圖片”，檔案請自行製作與編排，並存檔輸出PDF檔，檔案大小請控制在3M以下，
+ 							 PDF檔名標題請依格式填寫： [2014 iDCard] 校系_姓名<br>
+							 (範例：[2014 iDCard]台科大工商業設計系_王曉明)</p>
+            <blockquote><p>詳細 iDCard 內容請參照 <a class="red" href="http://www.openhci.com/#icard">活動網站報名資訊內說明</a> 。</p> </blockquote>
+            <p><i class="fa fa-exclamation-triangle fa-lg"></i> &nbsp;&nbsp;最後在本報名系統內上傳，請注意報名期限與報名方式，若檔名、檔案格式與大小不符，造成漏檔，報名者請自行負責。</p>
+
+
+            <a class="typeform-share button" href="https://openhci.typeform.com/to/Yhhmzl" data-mode="1" target="_blank">進入第一階段「線上問卷」</a>
+<script>(function(){var qs,js,q,s,d=document,gi=d.getElementById,ce=d.createElement,gt=d.getElementsByTagName,id='typef_orm',b='https://s3-eu-west-1.amazonaws.com/share.typeform.com/';if(!gi.call(d,id)){js=ce.call(d,'script');js.id=id;js.src=b+'share.js';q=gt.call(d,'script')[0];q.parentNode.insertBefore(js,q)}})()</script>
+         </div> <!-- end .main-col -->
+      </div>
+   </section> <!-- About Section End-->
+
+	 <script src="javascript/jquery-1.11.1.min.js"></script>
+   <script src="javascript/init.js"></script>
 </body>
 </html>
