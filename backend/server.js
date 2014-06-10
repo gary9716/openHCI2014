@@ -34,10 +34,12 @@ var s3_isAvailable;
 var s3_client;
 
 if(!s3_access_key_id || !s3_secret_access_key || !s3_username || !s3_password || !s3_bucket) {
+	console.log('s3 is unavailable');
 	s3_isAvailable = false;
 	form.uploadDir = path.resolve(__dirname + '/../filesFolder');
 }
 else {
+	console.log('s3 is available');
 	s3_isAvailable = true;
 	form.uploadDir = __dirname + '/tmp';
 	s3_client = require('knox').createClient({
