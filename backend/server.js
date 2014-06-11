@@ -17,12 +17,11 @@ MongoClient.connect(mongodb_uri, function(err, db) {
 
 var gfs;
 var fileOptions = {
-	//_id: null, // a MongoDb ObjectId
+	_id: null, // a MongoDb ObjectId
     filename: null, // a filename
     mode: 'w', // default value: w+, possible options: w, w+ or r, see [GridStore](http://mongodb.github.com/node-mongodb-native/api-generated/gridstore.html)
     root: 'registerdata'
 };
-
 
 var express = require('express'); 
 var fs = require('fs');
@@ -36,7 +35,7 @@ var port = process.env.PORT || 5000;
 var form = new formidable.IncomingForm();
 	form.encoding = 'utf-8';
 	form.keepExtensions = true;
-	form.maxFieldsSize = 2 * 1024 * 1024; //2MB
+	form.maxFieldsSize = 3 * 1024 * 1024; //2MB
 	form.type = 'multipart';
 	form.multiples = false;
 
@@ -77,6 +76,27 @@ else {
 
 }
 
+var typeformDataApi = process.env.TYPEFORM_DATAAPI;
+var request = require('request');
+var tokensAndNames;
+function refreshData() {
+	request(typeformDataApi, function (err,res,body){
+		if (!err && res.statusCode == 200) {
+			jsonData = JSON.parse(body);
+			tokensAndNames = [];
+			jsonData.responses.forEach(function (element) {
+				tokensAndNames.push({
+					"token": element.token,
+					"name": element.answers.textfield_1032591
+				});
+			});
+			//console.log(tokensAndNames);
+		}
+	});
+}
+
+refreshData();
+
 var global_res;
 
 form.on('file', function(field, file) {
@@ -112,7 +132,7 @@ form.on('file', function(field, file) {
       	
         });
 		*/
-		//fileOptions._id = 
+		fileOptions._id = file.name;
 		fileOptions.filename = file.name;
 		var writestream = gfs.createWriteStream(fileOptions);
 		fs.createReadStream(file.path).pipe(writestream);
@@ -128,6 +148,7 @@ form.on('file', function(field, file) {
 		return;
 	});
 	*/
+
 
 //http routing
 app.get("/uploadFile",function (req,res) {
@@ -170,7 +191,7 @@ app.get("/uploadFile",function (req,res) {
 	
 
 })
-.post("/file/upload",function (req,res) {
+.post("/file/upload/:id",function (req,res) {
 	console.log("start to upload");
 	global_res = res;
     form.parse(req);

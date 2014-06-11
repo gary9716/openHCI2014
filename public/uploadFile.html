@@ -5,45 +5,45 @@
 	<title>OpenHCI 2014 Registration</title>
 	<link rel="stylesheet" href="css/default.css">
 	<link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/media-queries.css">
+	<link rel="stylesheet" href="css/media-queries.css">
 	<link rel="stylesheet" href="css/dropzone.css" />
 	<link rel="stylesheet" href="css/uploadFile.css" />
 	<link rel="shortcut icon" type="image/png" href="/images/favicon.png" >
 	<script src="javascript/dropzone.min.js"></script>
 	<script src="javascript/jquery-1.11.1.min.js"></script>
 	<script type="text/javascript">
-	jQuery(document).ready(function($) {
-		$('header').css({ 'height': $(window).height() });
-	   $(window).on('resize', function() {
+		jQuery(document).ready(function($) {
+			$('header').css({ 'height': $(window).height() });
+			$(window).on('resize', function() {
 
-	        $('header').css({ 'height': $(window).height() });
-	        $('body').css({ 'width': $(window).width() })
-	   });
-	});
+				$('header').css({ 'height': $(window).height() });
+				$('body').css({ 'width': $(window).width() })
+			});
+		});
 	</script>
 </head>
 <body>
-	<!-- Header
-   ================================================== -->
-	 <header id="home">
-	    <div class="logo" data-stellar-ratio="0.5">
-	       <img src="/images/openhci2014/lagontology.png">
-	    </div>
-	    <div class="row banner">
-	       <div class="banner-text">
-	          <h1 class="responsive-headline">OpenHCI 2014 Registration Part 2</h1>
-	          <h3 id="hint_message"><span>
-						Just drag and drop the file<br>
-						anywhere on this page to upload file</span></h3>
-						<hr />
-						<div id="previews" class="dropzone-previews"></div>
-						<button id="clickable">Click me to select files</button>
-						<div id="hidden_area" style="display: none;"></div>
-						<button id="uploadToServer">Click me upload to server</button>
-	          <hr />
-	       </div>
-	    </div>
-	 </header> <!-- Header End -->
+<!-- Header
+	================================================== -->
+	<header id="home">
+	<div class="logo" data-stellar-ratio="0.5">
+		<img src="/images/openhci2014/lagontology.png">
+	</div>
+	<div class="row banner">
+		<div class="banner-text">
+			<h1 class="responsive-headline">OpenHCI 2014 Registration Part 2</h1>
+			<h3 id="hint_message"><span>
+				Just drag and drop the file<br>
+				anywhere on this page to upload file</span></h3>
+				<hr />
+				<div id="previews" class="dropzone-previews"></div>
+				<button id="clickable">or click me to select files</button>
+				<div id="hidden_area" style="display: none;"></div>
+				<button id="uploadToServer">Click me upload to server</button>
+				<hr />
+			</div>
+		</div>
+	</header> <!-- Header End -->
 	<script src="javascript/uploadFile.js"></script>
 </body>
 </html>

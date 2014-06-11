@@ -16,6 +16,7 @@ var inlineBlock_CSSValue = 'inline-block';
 
 var numOfFilesKeptInDropzone = 0;
 const maxNumOfFiles = 1;
+const maxFileSizeInMB = 3;
 var toAddFile = false;
 var toRemoveFile = false;
 var uploadButton = $('button#uploadToServer');
@@ -64,7 +65,7 @@ var hiddenDiv = $('div#hidden_area');
 			clickable: "div#hidden_area", // Define the element that should be used as click trigger to select files.
 			paramName: "file",
 			url: "/file/upload",
-			maxFilesize: 2, //in MB
+			maxFilesize: maxFileSizeInMB, //in MB
 			maxFiles: maxNumOfFiles,
 			autoProcessQueue: false, //have to call dropzone.processQueue() myself
 			uploadMultiple: false,
