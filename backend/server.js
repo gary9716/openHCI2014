@@ -2,7 +2,7 @@ var mongo = require('mongodb');
 var MongoClient = mongo.MongoClient;
 var Grid = require('gridfs-stream');
 var mongodb_uri = process.env.MONGOLAB_URI || 'mongodb://localhost/test';
-
+var collectionName = 'registerdata';
 console.log(mongodb_uri);
 
 MongoClient.connect(mongodb_uri, function(err, db) {
@@ -11,7 +11,7 @@ MongoClient.connect(mongodb_uri, function(err, db) {
 	}
 	console.log('database connection established');
 	gfs = Grid(db,mongo);
-	serverStartToListen();
+	refreshData(serverStartToListen);
 
 });
 
@@ -20,7 +20,7 @@ var fileOptions = {
 	_id: null, // a MongoDb ObjectId
     filename: null, // a filename
     mode: 'w', // default value: w+, possible options: w, w+ or r, see [GridStore](http://mongodb.github.com/node-mongodb-native/api-generated/gridstore.html)
-    root: 'registerdata'
+    root: collectionName
 };
 
 var express = require('express'); 
@@ -76,26 +76,30 @@ else {
 
 }
 
+
 var typeformDataApi = process.env.TYPEFORM_DATAAPI;
 var request = require('request');
 var tokensAndNames;
-function refreshData() {
+function refreshData(callback) {
 	request(typeformDataApi, function (err,res,body){
 		if (!err && res.statusCode == 200) {
 			jsonData = JSON.parse(body);
-			tokensAndNames = [];
+			tokensAndNames = {
+				"tokens": [],
+				"names": []
+			};
+
 			jsonData.responses.forEach(function (element) {
-				tokensAndNames.push({
-					"token": element.token,
-					"name": element.answers.textfield_1032591
-				});
+				tokensAndNames.tokens.push(element.token);
+				tokensAndNames.names.push(element.answers.textfield_1032591);
 			});
-			//console.log(tokensAndNames);
+			console.log(tokensAndNames);
+			if(callback) {
+				callback();
+			}
 		}
 	});
 }
-
-refreshData();
 
 var global_res;
 
@@ -132,7 +136,7 @@ form.on('file', function(field, file) {
       	
         });
 		*/
-		fileOptions._id = file.name;
+		fileOptions._id = tokenId;
 		fileOptions.filename = file.name;
 		var writestream = gfs.createWriteStream(fileOptions);
 		fs.createReadStream(file.path).pipe(writestream);
@@ -152,13 +156,13 @@ form.on('file', function(field, file) {
 
 //http routing
 app.get("/uploadFile",function (req,res) {
-	res.sendfile(uploadFileHtmlPath);
+	res.sendfile(uploadFileHtmlPath); //file upload page
 })
-.get("/file/download/:fileName",function (req,res) {
+.get("/file/download/:fileId",function (req,res) {
 	
 	if(!s3_isAvailable) {
-		res.download(form.uploadDir + "/" + req.params.fileName,
-					 req.params.fileName,
+		res.download(form.uploadDir + "/" + req.params.fileId,
+					 req.params.fileId,
 					 function (err) {
 					 	if(err) {
 					 		console.log(err);
@@ -172,7 +176,7 @@ app.get("/uploadFile",function (req,res) {
 		// 	res.resume();
 		// });
 		
-		// gfs.exist({ filename:req.params.fileName,root: 'registerdata' }, function (err, found) {
+		// gfs.exist({ filename:req.params.fileName,root: collectionName }, function (err, found) {
 		//   if (err) {
 		//   	res.send(400,{ error:'error happened when checking file existed or not' });
 		//   }
@@ -185,17 +189,63 @@ app.get("/uploadFile",function (req,res) {
 		//   }
 		// });
 
-		var readstream = gfs.createReadStream({ filename:req.params.fileName,root: 'registerdata' });
+		var readstream = gfs.createReadStream({ _id: req.params.fileId,root: collectionName });
+		
 		readstream.pipe(res);
 	}
 	
 
 })
-.post("/file/upload/:id",function (req,res) {
-	console.log("start to upload");
+.get("/username/get/:id",function (req,res) {
+	global_req = req;
 	global_res = res;
-    form.parse(req);
+	indexOfToken = tokensAndNames.tokens.indexOf(req.params.id);
+	if(indexOfToken !== -1) { //find id
+		res.send(200,{ username:tokensAndNames.names[indexOfToken] });
+	}
+	else {
+		refreshData(getHandlerInUsernameGet);
+	}
+})
+.post("/file/upload/:id",function (req,res) {
+	global_res = res;
+	if(tokensAndNames.tokens.indexOf(req.params.id) !== -1) { //find id
+		tokenId = req.params.id;
+		console.log("start to upload");
+    	form.parse(req);
+    }
+    else {
+    	global_req = req;
+    	refreshData(postHandlerInFileUploadId);
+    }
 });
+
+var global_req;
+
+function postHandlerInFileUploadId() {
+	if(tokensAndNames.tokens.indexOf(global_req.params.id) !== -1) {
+		tokenId = global_req.params.id;
+		console.log("start to upload");
+    	form.parse(global_req);
+	}
+	else {
+		global_res.send(401,{ error:"unrecognized user" }); //Unauthorized
+	}
+}
+
+var indexOfToken;
+
+function getHandlerInUsernameGet() {
+	indexOfToken = tokensAndNames.tokens.indexOf(global_req.params.id);
+	if(indexOfToken !== -1) {
+		global_res.send(200,{ username:tokensAndNames.names[indexOfToken] });
+	}
+	else {
+		global_res.send(401,{ error:"unrecognized user" }); //Unauthorized
+	}
+}
+
+var tokenId;
 
 function serverStartToListen() { //wait for DB connection
 	app.listen(port, function(){
