@@ -197,13 +197,13 @@ app.get("/uploadFile",function (req,res) {
 
 })
 .get("/username/get/:id",function (req,res) {
-	global_req = req;
-	global_res = res;
 	indexOfToken = tokensAndNames.tokens.indexOf(req.params.id);
 	if(indexOfToken !== -1) { //find id
 		res.send(200,{ username:tokensAndNames.names[indexOfToken] });
 	}
 	else {
+		global_req = req;
+		global_res = res;
 		refreshData(getHandlerInUsernameGet);
 	}
 })
