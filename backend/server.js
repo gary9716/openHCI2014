@@ -11,8 +11,8 @@ MongoClient.connect(mongodb_uri, function(err, db) {
 	}
 	console.log('database connection established');
 	gfs = Grid(db,mongo);
-	refreshData(serverStartToListen);
-
+	//refreshData(serverStartToListen);
+	serverStartToListen();
 });
 
 var gfs;
@@ -172,42 +172,27 @@ app.set('view engine','ejs')
 	var email = req.query.email;
 	var password = req.query.password;
 	var indexOfEmail = typeformData.emails.indexOf(email);
-	if(indexOfEmail !== -1) {
-		if(typeformData.passwords[indexOfEmail] === password) {
-			res.send(200,{
-				username: typeformData.names[indexOfEmail],
-				id: typeformData.tokens[indexOfEmail]
-			});
-		}
-		else {
-			res.send(401,{
-				error: "incorrect password"
-			});
-		}
-	}
-	else {
-		refreshData(function () {
-			var indexOfEmail = typeformData.emails.indexOf(email);
-			if(indexOfEmail !== -1) {
-				if(typeformData.passwords[indexOfEmail] === password) {
-					res.send(200,{
-						username: typeformData.names[indexOfEmail],
-						id: typeformData.tokens[indexOfEmail]
-					});
-				}
-				else {
-					res.send(401,{
-						error: "incorrect password"
-					});
-				}
-			}
-			else {
-				res.send(401, {
-					error: "authentication failed"
+	refreshData(function () {
+		var indexOfEmail = typeformData.emails.indexOf(email);
+		if(indexOfEmail !== -1) {
+			if(typeformData.passwords[indexOfEmail] === password) {
+				res.send(200,{
+					username: typeformData.names[indexOfEmail],
+					id: typeformData.tokens[indexOfEmail]
 				});
 			}
-		});
-	}
+			else {
+				res.send(401,{
+					error: "incorrect password"
+				});
+			}
+		}
+		else {
+			res.send(401, {
+				error: "authentication failed"
+			});
+		}
+	});
 });
 /*
 .get("/checkEmail/:email",function (req,res) {
@@ -270,23 +255,16 @@ app.get("/uploadFile",sendUploadFilePage)
 })
 .post("/file/upload/:id",function (req,res) {
 	global_res = res;
-	if(typeformData.tokens.indexOf(req.params.id) !== -1) { //find id
-		tokenId = req.params.id;
-		console.log("start to upload");
-    	form.parse(req);
-    }
-    else {
-    	refreshData(function () {
-			if(typeformData.tokens.indexOf(req.params.id) !== -1) {
-				tokenId = req.params.id;
-				console.log("start to upload");
-		    	form.parse(req);
-			}
-			else {
-				res.send(401,{ error:"unrecognized user" }); //Unauthorized
-			}
-		});
-   }
+	refreshData(function () {
+		if(typeformData.tokens.indexOf(req.params.id) !== -1) {
+			tokenId = req.params.id;
+			console.log("start to upload");
+	    	form.parse(req);
+		}
+		else {
+			res.send(401,{ error:"unrecognized user" }); //Unauthorized
+		}
+	});
 });
 
 var tokenId;
