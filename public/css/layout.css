@@ -118,6 +118,18 @@ header .logo img {
   height: 300px;
 }
 
+header #email-input {
+  margin:0 auto; 
+  margin-bottom: 5px; 
+  width: 350px;
+}
+
+header #confirm-email {
+  margin: 0 auto; 
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+
 /* primary navigation
 --------------------------------------------------------------------- */
 #nav-wrap ul, #nav-wrap li, #nav-wrap a {
@@ -212,8 +224,8 @@ ul#nav li.current a { color: #F06000; }
 }
 #about .profile-pic {
    position: relative;
-   width: 120px;
-   height: 120px;
+   width: 160px;
+   height: 180px;
    /*border-radius: 100%;*/
 }
 #about .contact-details { width: 41.66667%; }

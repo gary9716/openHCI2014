@@ -1,28 +1,28 @@
 (function (){
-var host = window.location.origin;
-//var host = 'http://openhci2014.herokuapp.com'
+	var host = window.location.origin;
+	//var host = 'http://openhci2014.herokuapp.com'
 
-var drop_EVENT = "drop";
-var addedFile_EVENT = "addedfile";
-var removedfile_EVENT = "removedfile";
-var maxfilesreached_EVENT = "maxfilesreached";
-var success_EVENT = "success";
+	var drop_EVENT = "drop";
+	var addedFile_EVENT = "addedfile";
+	var removedfile_EVENT = "removedfile";
+	var maxfilesreached_EVENT = "maxfilesreached";
+	var success_EVENT = "success";
 
-var click_EVENT = "click";
+	var click_EVENT = "click";
 
-var display_CSSProperty = 'display';
-var none_CSSValue = 'none';
-var inlineBlock_CSSValue = 'inline-block';
+	var display_CSSProperty = 'display';
+	var none_CSSValue = 'none';
+	var inlineBlock_CSSValue = 'inline-block';
 
-var numOfFilesKeptInDropzone = 0;
-const maxNumOfFiles = 1;
-const maxFileSizeInMB = 3;
-var toAddFile = false;
-var toRemoveFile = false;
-var uploadButton = $('button#uploadToServer');
-var hintMessage = $('h1#hint_message');
-var chooseFileButton = $('button#clickable');
-var hiddenDiv = $('div#hidden_area');
+	var numOfFilesKeptInDropzone = 0;
+	const maxNumOfFiles = 1;
+	const maxFileSizeInMB = 3;
+	var toAddFile = false;
+	var toRemoveFile = false;
+	var uploadButton = $('button#uploadToServer');
+	var hintMessage = $('h1#hint_message');
+	var chooseFileButton = $('button#clickable');
+	var hiddenDiv = $('div#hidden_area');
 
 	function dropAndClickEventHandler(event) {
 		
@@ -135,6 +135,21 @@ var hiddenDiv = $('div#hidden_area');
 	//disable browser's default event
 	$(document).bind('drop dragover', function (e) {
     	e.preventDefault();
+	});
+
+
+	// init 
+	function init() {
+		uploadButton.hide();
+		slidesDropzone.disable();
+	}
+	init();
+	
+	// confirm email click function
+	$('#confirm-email').click(function(){
+		var inputEmail = $('input#email-input').val().trim();
+		
+
 	});
 
 })();
