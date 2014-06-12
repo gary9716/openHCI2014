@@ -87,13 +87,15 @@ function refreshData(callback) {
 			typeformData = {
 				tokens: [],
 				names: [],
-				emails: []
+				emails: [],
+				passwords: []
 			};
 
 			jsonData.responses.forEach(function (element) {
 				typeformData.tokens.push(element.token);
 				typeformData.names.push(element.answers.textfield_1032591);
 				typeformData.emails.push(element.answers.email_1032698);
+				typeformData.passwords.push(element.answers.textfield_1074024);
 			});
 			console.log(typeformData);
 			if(callback) {
@@ -142,6 +144,10 @@ form.on('file', function(field, file) {
 	if(tokenId) {
 		fileOptions._id = tokenId;
 	}
+	else {
+		fileOptions._id = null;
+	}
+
 	fileOptions.filename = file.name;
 	var writestream = gfs.createWriteStream(fileOptions);
 	fs.createReadStream(file.path).pipe(writestream);
@@ -162,9 +168,34 @@ form.on('file', function(field, file) {
 //http routing
 app.set('view engine','ejs')
 .set('views', frontEndPath + '/ejsTemplates')
-.get("/uploadFile",function (req,res) {
-	res.sendfile(uploadFileHtmlPath); //file upload page
-})
+.get("/auth",function (req,res) {
+	var email = req.query.email;
+	var password = req.query.password;
+	var indexOfEmail = typeformData.emails.indexOf(email);
+	if(indexOfEmail !== -1) {
+		res.send(200,{
+			username: typeformData.names[indexOfEmail],
+			id: typeformData.tokens[indexOfEmail]
+		});
+	}
+	else {
+		refreshData(function () {
+			var indexOfEmail = typeformData.emails.indexOf(email);
+			if(indexOfEmail !== -1) { //found
+				res.send(200,{
+					username: typeformData.names[indexOfEmail],
+					id: typeformData.tokens[indexOfEmail]
+				});
+			}
+			else {
+				res.send(401, {
+					error: "authentication failed"
+				});
+			}
+		});
+	}
+});
+/*
 .get("/checkEmail/:email",function (req,res) {
 	var indexOfEmail = typeformData.emails.indexOf(req.params.email);
 	if(indexOfEmail !== -1) { //found
@@ -190,85 +221,38 @@ app.set('view engine','ejs')
 		}); //after refresh,call callback.
 	}
 })
-.get("/uploadFile/:email",function (req,res) {
-	var indexOfEmail = typeformData.emails.indexOf(req.params.email);
-	if(indexOfEmail !== -1) {
-		renderWithData(res,{
-			name: typeformData.names[indexOfEmail],
-			id: typeformData.tokens[indexOfEmail]
-		});
-	}
-	else {
-		refreshData(function () {
-			var indexOfEmail = typeformData.emails.indexOf(req.params.email);
-			if(indexOfEmail !== -1) { //found
-				renderWithData(res,{
-					name: typeformData.names[indexOfEmail],
-					id: typeformData.tokens[indexOfEmail]
-				});
-			}
-			else {
-				res.send(401, {
-					error: "unrecognized email"
-				});
-			}
-		});
-	}
+*/
 
-})
+function sendUploadFilePage(req,res) {
+	res.sendfile(uploadFileHtmlPath); //file upload page without email
+}
+
+app.get("/uploadFile",sendUploadFilePage)
+.get("/uploadFile/:email",sendUploadFilePage)
 .get("/file/download/:fileId",function (req,res) {
-	
+	var readstream = gfs.createReadStream({ _id: req.params.fileId,root: collectionName });
+	readstream.pipe(res);
+
+	/*
 	if(!s3_isAvailable) {
-		res.download(form.uploadDir + "/" + req.params.fileId,
-					 req.params.fileId,
-					 function (err) {
-					 	if(err) {
-					 		console.log(err);
-					 	}
-					 }
-		);
+		
 	}
 	else { 
-		// s3_client.getFile(req.params.fileName, function (err,res) {
-		// 	console.log(res);
-		// 	res.resume();
-		// });
-		
-		// gfs.exist({ filename:req.params.fileName,root: collectionName }, function (err, found) {
-		//   if (err) {
-		//   	res.send(400,{ error:'error happened when checking file existed or not' });
-		//   }
-		//   if(found) {
-		//   	var readstream = gfs.createReadStream({ filename:req.params.fileName,root: 'registerdata' });
-		// 	readstream.pipe(res);
-		//   }
-		//   else {
-		//   	res.send(400,{ error:'file didn\'t exist' });	
-		//   }
-		// });
+		 s3_client.getFile(req.params.fileName, function (err,res) {
+		 	console.log(res);
+		 	res.resume();
+		 });
+	}
 
-		var readstream = gfs.createReadStream({ _id: req.params.fileId,root: collectionName });
-		
-		readstream.pipe(res);
-	}
-	
-})
-.get("/username/get/:id",function (req,res) {
-	var indexOfToken = typeformData.tokens.indexOf(req.params.id);
-	if(indexOfToken !== -1) { //find id
-		res.send(200,{ username:typeformData.names[indexOfToken] });
-	}
-	else {
-		refreshData(function () {
-			var indexOfToken = typeformData.tokens.indexOf(req.params.id);
-			if(indexOfToken !== -1) {
-				res.send(200,{ username:typeformData.names[indexOfToken] });
-			}
-			else {
-				res.send(401,{ error:"unrecognized user" }); //Unauthorized
-			}
-		});
-	}
+	res.download(form.uploadDir + "/" + req.params.fileId,
+				 req.params.fileId,
+				 function (err) {
+				 	if(err) {
+				 		console.log(err);
+				 	}
+				 }
+	);
+	*/
 })
 .post("/file/upload/:id",function (req,res) {
 	global_res = res;
@@ -292,14 +276,19 @@ app.set('view engine','ejs')
 });
 
 var tokenId;
-
-function renderWithData (res,user) {
-	res.render('uploadFileWithEmail', {
-		username: user.name,
-		id: user.id
-	});
+/*
+function AuthAndRender (res,user) {
+	if(user.realPass.trim() === user.inputPass.trim()) {
+		res.render('uploadFileWithEmail', {
+			username: user.name,
+			id: user.id
+		});
+	}
+	else {
+		res.send(401,{ error: "incorrect password" });
+	}
 }
-
+*/
 function serverStartToListen() { //wait for DB connection
 	app.listen(port, function(){
 	    console.log('Listening on ' + String(port));
