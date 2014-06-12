@@ -118,10 +118,22 @@ header .logo img {
   height: 300px;
 }
 
-header #email-input {
-  margin:0 auto; 
-  margin-bottom: 5px; 
+header #error-message {
+  margin: 0 auto; 
   width: 350px;
+  background: #C0392B;
+  color: #fff;
+  opacity: 0.9;
+  text-align: left;
+  padding-left: 10px;
+  display: none;
+}
+
+header #email-input, header #password-input {
+  margin: 0 auto; 
+  margin-bottom: 20px; 
+  width: 350px;
+  padding: 10px;
 }
 
 header #confirm-email {

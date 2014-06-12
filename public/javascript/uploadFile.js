@@ -138,16 +138,44 @@
 	});
 
 
+
 	// init 
 	function init() {
 		uploadButton.hide();
 		slidesDropzone.disable();
+
+		if(window.location.pathname.split('/').length === 3 && window.location.pathname.split('/')[1] === 'uploadfile') {
+			$('input#email-input').val(window.location.pathname.split('/')[2]);
+		}
 	}
 	init();
 	
 	// confirm email click function
 	$('#confirm-email').click(function(){
 		var inputEmail = $('input#email-input').val().trim();
+		var inputPassword = $('input#password-input').val();
+		$('input#email-input').val(inputEmail);
+		if(inputEmail && inputPassword){
+			$.get('/auth', {email: inputEmail, password: inputPassword}, function(res){
+
+			}).fail(function(error) {
+		    console.log(error);
+		  });
+			
+			$.get('/checkEmail/'+inputEmail, function(res){
+				console.log(res);
+
+			}).fail(function(error) {
+		    console.log(error);
+		  });
+		}
+		else {
+			$('#error-message').text('尚未輸入 Email 或密碼').fadeIn();
+			setTimeout(function(){
+				$('#error-message').text('').hide();
+			}, 5000);	
+		}
+		
 		
 
 	});
