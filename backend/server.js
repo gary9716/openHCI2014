@@ -173,7 +173,7 @@ app.set('view engine','ejs')
 	var password = req.query.password;
 	var indexOfEmail = typeformData.emails.indexOf(email);
 	if(indexOfEmail !== -1) {
-		if(typeformData.passwords[indexOfEmail].trim() === password.trim()) {
+		if(typeformData.passwords[indexOfEmail] === password) {
 			res.send(200,{
 				username: typeformData.names[indexOfEmail],
 				id: typeformData.tokens[indexOfEmail]
@@ -189,7 +189,7 @@ app.set('view engine','ejs')
 		refreshData(function () {
 			var indexOfEmail = typeformData.emails.indexOf(email);
 			if(indexOfEmail !== -1) {
-				if(typeformData.passwords[indexOfEmail].trim() === password.trim()) {
+				if(typeformData.passwords[indexOfEmail] === password) {
 					res.send(200,{
 						username: typeformData.names[indexOfEmail],
 						id: typeformData.tokens[indexOfEmail]
@@ -286,7 +286,7 @@ app.get("/uploadFile",sendUploadFilePage)
 				res.send(401,{ error:"unrecognized user" }); //Unauthorized
 			}
 		});
-    }
+   }
 });
 
 var tokenId;
