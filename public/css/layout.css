@@ -142,6 +142,21 @@ header #confirm-email {
   margin-bottom: 5px;
 }
 
+header #pass-area {
+  margin: 0 auto; 
+  width: 350px;
+  color: #fff;
+  font: 150% 'opensans-bold', sans-serif;
+  background: rgba(255, 255, 255, 0.2);
+  display: none;
+}
+
+header #pass-area .info {
+  padding: 20px 0;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
 /* primary navigation
 --------------------------------------------------------------------- */
 #nav-wrap ul, #nav-wrap li, #nav-wrap a {

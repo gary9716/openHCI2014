@@ -3,14 +3,14 @@
 <head>
 	<meta charset="utf-8">
 	<title>OpenHCI 2014 Registration</title>
-	<link rel="stylesheet" href="css/default.css">
-	<link rel="stylesheet" href="css/layout.css">
-	<link rel="stylesheet" href="css/media-queries.css">
-	<link rel="stylesheet" href="css/dropzone.css" />
-	<link rel="stylesheet" href="css/uploadFile.css" />
+	<link rel="stylesheet" href="/css/default.css">
+	<link rel="stylesheet" href="/css/layout.css">
+	<link rel="stylesheet" href="/css/media-queries.css">
+	<link rel="stylesheet" href="/css/dropzone.css" />
+	<link rel="stylesheet" href="/css/uploadFile.css" />
 	<link rel="shortcut icon" type="image/png" href="/images/favicon.png" >
-	<script src="javascript/dropzone.min.js"></script>
-	<script src="javascript/jquery-1.11.1.min.js"></script>
+	<script src="/javascript/dropzone.min.js"></script>
+	<script src="/javascript/jquery-1.11.1.min.js"></script>
 </head>
 <body>
 	<!-- Header
@@ -24,25 +24,29 @@
 	          <h1 class="responsive-headline">OpenHCI 2014 Registration Part 2</h1>
 	          <h3><span>
 						上傳「iDCard」檔案<br>
-						一份兩頁之投影片，包含“個人簡歷”與“發想相關圖片”，檔案請自行製作與編排，並存檔輸出PDF檔，檔案大小請控制在3M以下</span></h3>
+						一份兩頁之投影片，包含“個人簡歷”與“發想相關圖片”，檔案請自行製作與編排，並存檔輸出 PDF 檔，檔案大小請控制在 3M 以下</span></h3>
 						<hr />
-						<div id="previews" class="dropzone-previews"></div>
-						<button id="clickable" style="display: none;">Click me to select files</button>
-						<div id="hidden_area" style="display: none;"></div>
-						<div>
+						
+						<div id="auth-area">
 							<input id="email-input" type="email" placeholder="請輸入線上問卷中的 Email" value="" name="email">
 							<input id="password-input" type="password" placeholder="請輸入線上問卷中的所填的密碼" value="" name="password">
 							<p id="error-message"></p>
 							<button id="confirm-email">確認</button>
 						</div>
-						<button id="uploadToServer">Click me upload to server</button>
+						<div id="pass-area">
+							<p class="info"></p>
+							<div id="previews" class="dropzone-previews"></div>
+							<button id="clickable">選擇 iDCard 檔案</button>
+							<div id="hidden_area" style="display: none;"></div>
+							<button id="uploadToServer">開始上傳 <i class="fa fa-arrow-circle-up"></i></button>
+						</div>
 	          <hr />
 	       </div>
 	    </div>
 
 	 </header> <!-- Header End -->
 
-	<script src="javascript/uploadFile.js"></script>
-	<script src="javascript/init.js"></script>
+	<script src="/javascript/uploadFile.js"></script>
+	<script src="/javascript/init.js"></script>
 </body>
 </html>

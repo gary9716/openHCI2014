@@ -108,21 +108,16 @@
 			    	}
 			    })
 			    .on(success_EVENT, function(file) {
-			    	//console.log('done-uploading');
 			    	var template = '<a class="dz-remove" style="margin-top:5px;">download</a>';
-					$(template).appendTo('div.dz-preview').on(click_EVENT,function (event){
+						$(template).appendTo('div.dz-preview').on(click_EVENT,function (event){
 						var fileName = $('div.dz-filename').find('span').text();
-						// console.log(fileName);
-						// $.get(host + '/file/download/' + fileName,function (data) {
-						//  	//console.log(data);
-						// });
 						window.open(host + '/file/download/' + fileName);
 
 					});
-			    });
+			  });
 			},
 			
-			addRemoveLinks: true,
+			addRemoveLinks: false,
 			previewsContainer: "#previews" // Define the container to display the previews,
 			
 		}
@@ -157,20 +152,28 @@
 		$('input#email-input').val(inputEmail);
 		if(inputEmail && inputPassword){
 			$.get('/auth', {email: inputEmail, password: inputPassword}, function(res){
+				$('#auth-area').hide();
+				$('#pass-area .info').text('Hello, '+res.username);
+				$('#pass-area').fadeIn();
+				slidesDropzone.enable();
+				slidesDropzone.options.url = '/file/upload/'+res.id;
+
+				slidesDropzone.on("addedfile", function(file) {
+			    $('#pass-area .info').text('Hello, '+res.username)
+			  });
+				slidesDropzone.on("success", function(file) {
+			    $('#pass-area .info').text('Hello, '+res.username+' 檔案已上傳成功！')
+			  });
 
 			}).fail(function(error) {
-		    console.log(error);
-		  });
-			
-			$.get('/checkEmail/'+inputEmail, function(res){
-				console.log(res);
-
-			}).fail(function(error) {
-		    console.log(error);
+		    $('#error-message').text('無效的電子郵件或密碼').fadeIn();
+				setTimeout(function(){
+					$('#error-message').text('').hide();
+				}, 5000);	
 		  });
 		}
 		else {
-			$('#error-message').text('尚未輸入 Email 或密碼').fadeIn();
+			$('#error-message').text('尚未輸入電子郵件或密碼').fadeIn();
 			setTimeout(function(){
 				$('#error-message').text('').hide();
 			}, 5000);	
