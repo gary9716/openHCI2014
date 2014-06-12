@@ -163,6 +163,7 @@ form.on('file', function(field, file) {
 			fileOptions._id = tokenId;
 		}
 		else {
+			console.log('no token id for ' + file.name);
 			fileOptions._id = null;
 		}
 		fileOptions.filename = file.name;
@@ -228,7 +229,11 @@ app.get("/uploadFile",sendUploadFilePage)
 .get("/uploadFile/:email",sendUploadFilePage)
 .get("/file/download/:fileId",function (req,res) {
 	try {
-		var readstream = gfs.createReadStream({ _id: req.params.fileId,root: collectionName });
+		var readstream = gfs.createReadStream({ 
+			_id: req.params.fileId,
+			mode: 'r',
+			root: collectionName 
+		});
 		readstream.pipe(res);
 	}
 	catch (exception) {
@@ -262,7 +267,7 @@ app.get("/uploadFile",sendUploadFilePage)
 	refreshData(function () {
 		if(typeformData.tokens.indexOf(req.params.id) !== -1) {
 			tokenId = req.params.id;
-			console.log("start to upload");
+			console.log("start to upload with id:" + tokenId);
 	    	form.parse(req);
 		}
 		else {
