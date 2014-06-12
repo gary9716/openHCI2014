@@ -191,11 +191,14 @@ form.on('file', function(field, file) {
 app.set('view engine','ejs')
 .set('views', frontEndPath + '/ejsTemplates')
 .get("/auth",function (req,res) {
+	console.log('start to auth');
 	var email = req.query.email;
 	var password = req.query.password;
 	refreshData(function () {
 		var indexOfEmail = typeformData.emails.indexOf(email);
 		if(indexOfEmail !== -1) {
+			console.log("real pass:" + typeformData.passwords[indexOfEmail]);
+			console.log("input pass:" + password);
 			if(typeformData.passwords[indexOfEmail] === password) {
 				res.send(200,{
 					username: typeformData.names[indexOfEmail],
