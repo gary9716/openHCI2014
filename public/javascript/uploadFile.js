@@ -151,7 +151,9 @@
 		var inputPassword = $('input#password-input').val();
 		$('input#email-input').val(inputEmail);
 		if(inputEmail && inputPassword){
+			$('#confirm-email').text('驗證中 ...');
 			$.get('/auth', {email: inputEmail, password: inputPassword}, function(res){
+				$('#confirm-email').text('確認');
 				$('#auth-area').hide();
 				$('#pass-area .info').text('Hello, '+res.username);
 				$('#pass-area').fadeIn();
@@ -166,6 +168,7 @@
 			  });
 
 			}).fail(function(error) {
+				$('#confirm-email').text('確認');
 		    $('#error-message').text('無效的電子郵件或密碼').fadeIn();
 				setTimeout(function(){
 					$('#error-message').text('').hide();
