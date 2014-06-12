@@ -149,8 +149,8 @@
 		$('input#email-input').val(inputEmail);
 		if(inputEmail && inputPassword){
 			$('#confirm-email').text('驗證中 ...');
-			//$.get('/auth', {email: inputEmail, password: inputPassword})
-			$.get('/auth' + '/' + inputEmail + '/' + inputPassword)
+			$.get('/auth', {email: inputEmail, password: inputPassword})
+			//$.get('/auth' + '/' + inputEmail + '/' + inputPassword)
 			.done(function(res) { //success
 				$('#confirm-email').text('確認');
 				$('#auth-area').hide();
