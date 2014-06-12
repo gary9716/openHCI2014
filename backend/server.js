@@ -173,19 +173,33 @@ app.set('view engine','ejs')
 	var password = req.query.password;
 	var indexOfEmail = typeformData.emails.indexOf(email);
 	if(indexOfEmail !== -1) {
-		res.send(200,{
-			username: typeformData.names[indexOfEmail],
-			id: typeformData.tokens[indexOfEmail]
-		});
+		if(typeformData.passwords[indexOfEmail].trim() === password.trim()) {
+			res.send(200,{
+				username: typeformData.names[indexOfEmail],
+				id: typeformData.tokens[indexOfEmail]
+			});
+		}
+		else {
+			res.send(401,{
+				error: "incorrect password"
+			});
+		}
 	}
 	else {
 		refreshData(function () {
 			var indexOfEmail = typeformData.emails.indexOf(email);
-			if(indexOfEmail !== -1) { //found
-				res.send(200,{
-					username: typeformData.names[indexOfEmail],
-					id: typeformData.tokens[indexOfEmail]
-				});
+			if(indexOfEmail !== -1) {
+				if(typeformData.passwords[indexOfEmail].trim() === password.trim()) {
+					res.send(200,{
+						username: typeformData.names[indexOfEmail],
+						id: typeformData.tokens[indexOfEmail]
+					});
+				}
+				else {
+					res.send(401,{
+						error: "incorrect password"
+					});
+				}
 			}
 			else {
 				res.send(401, {
