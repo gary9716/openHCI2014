@@ -149,7 +149,9 @@
 		$('input#email-input').val(inputEmail);
 		if(inputEmail && inputPassword){
 			$('#confirm-email').text('驗證中 ...');
-			$.get('/auth', {email: inputEmail, password: inputPassword}, function(res){
+			//$.get('/auth', {email: inputEmail, password: inputPassword})
+			$.get('/auth' + '/' + inputEmail + '/' + inputPassword)
+			.done(function(res) { //success
 				$('#confirm-email').text('確認');
 				$('#auth-area').hide();
 				$('#pass-area .info').text('Hello, '+res.username);
@@ -158,19 +160,20 @@
 				slidesDropzone.options.url = '/file/upload/'+res.id;
 
 				slidesDropzone.on("addedfile", function(file) {
-			    $('#pass-area .info').text('Hello, '+res.username)
-			  });
+				    $('#pass-area .info').text('Hello, '+res.username)
+				  });
 				slidesDropzone.on("success", function(file) {
-			    $('#pass-area .info').text('Hello, '+res.username+' 檔案已上傳成功！')
-			  });
+				    $('#pass-area .info').text('Hello, '+res.username+' 檔案已上傳成功！')
+				  });
 
-			}).fail(function(error) {
+			})
+			.fail(function(error) {
 				$('#confirm-email').text('確認');
 		    $('#error-message').text('無效的電子郵件或密碼').fadeIn();
 				setTimeout(function(){
 					$('#error-message').text('').hide();
 				}, 5000);	
-		  });
+		  	});
 		}
 		else {
 			$('#error-message').text('尚未輸入電子郵件或密碼').fadeIn();

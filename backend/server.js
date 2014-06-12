@@ -190,10 +190,11 @@ form.on('file', function(field, file) {
 //http routing
 app.set('view engine','ejs')
 .set('views', frontEndPath + '/ejsTemplates')
-.get("/auth",function (req,res) {
+.get("/auth/:email/:password",function (req,res) {
+//.get("/auth",function (req,res) {
 	console.log('start to auth');
-	var email = req.query.email;
-	var password = req.query.password;
+	var email = req.params.email;
+	var password = req.params.password;
 	refreshData(function () {
 		var indexOfEmail = typeformData.emails.indexOf(email);
 		if(indexOfEmail !== -1) {
