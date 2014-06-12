@@ -91,7 +91,7 @@ function refreshData(callback) {
 				passwords: []
 			};
 
-			jsonData.responses.forEach(function (element) {
+			jsonData.responses.reverse().forEach(function (element) {
 				typeformData.tokens.push(element.token);
 				typeformData.names.push(element.answers.textfield_1032591);
 				typeformData.emails.push(element.answers.email_1032698);
