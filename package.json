@@ -22,6 +22,7 @@
     "mongoose": "~3.8.12",
     "mongodb": "~1.4.5",
     "gridfs-stream": "~0.5.1",
-    "request": "~2.36.0"
+    "request": "~2.36.0",
+    "ejs": "~1.0.0"
   }
 }

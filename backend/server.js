@@ -28,6 +28,7 @@ var fs = require('fs');
 var formidable = require('formidable');
 var util = require('util');
 var path = require('path');
+var ejs = require('ejs');
 
 //paths
 var frontEndPath = __dirname + '/../public';
@@ -66,8 +67,7 @@ if(!s3_access_key_id || !s3_secret_access_key || !s3_username || !s3_password ||
 else {
 	console.log('s3 is available');
 	s3_isAvailable = true;
-	//form.uploadDir = __dirname + '/tmp';
-	//using default upload path
+	//form.uploadDir use default upload path
 	s3_client = require('knox').createClient({
 	    key: s3_access_key_id
 	  , secret: s3_secret_access_key
@@ -76,24 +76,26 @@ else {
 
 }
 
-
 var typeformDataApi = process.env.TYPEFORM_DATAAPI;
 var request = require('request');
-var tokensAndNames;
+var typeformData;
+
 function refreshData(callback) {
 	request(typeformDataApi, function (err,res,body){
 		if (!err && res.statusCode == 200) {
 			jsonData = JSON.parse(body);
-			tokensAndNames = {
-				"tokens": [],
-				"names": []
+			typeformData = {
+				tokens: [],
+				names: [],
+				emails: []
 			};
 
 			jsonData.responses.forEach(function (element) {
-				tokensAndNames.tokens.push(element.token);
-				tokensAndNames.names.push(element.answers.textfield_1032591);
+				typeformData.tokens.push(element.token);
+				typeformData.names.push(element.answers.textfield_1032591);
+				typeformData.emails.push(element.answers.email_1032698);
 			});
-			console.log(tokensAndNames);
+			console.log(typeformData);
 			if(callback) {
 				callback();
 			}
@@ -102,61 +104,117 @@ function refreshData(callback) {
 }
 
 var global_res;
+var global_req;
 
 form.on('file', function(field, file) {
-        //rename the incoming file to the file's local name
-        /*
-        var newFileNameAndPath = form.uploadDir + "/" + file.name;
-        fs.rename(file.path, newFileNameAndPath,function (err) {
-			console.log('file rename to:' + file.name);
-			
-			// if(!err) {
-			// 	s3_client.putFile(newFileNameAndPath, file.name, function(err, res){
-			// 	  // Always either do something with `res` or at least call `res.resume()`.
-					
-			// 		res.resume();
-			// 		if(!err) {
-			// 			global_res.end("upload complete");
-			// 		}
-			// 		else {
-			// 			global_res.send(400, { error: 'upload failed' }); //400 means bad request
-			// 		}
-			// 	});
-			// }
+    //rename the incoming file to the file's local name
+    /*
+    var newFileNameAndPath = form.uploadDir + "/" + file.name;
+    fs.rename(file.path, newFileNameAndPath,function (err) {
+		console.log('file rename to:' + file.name);
+		
+		// if(!err) {
+		// 	s3_client.putFile(newFileNameAndPath, file.name, function(err, res){
+		// 	  // Always either do something with `res` or at least call `res.resume()`.
+				
+		// 		res.resume();
+		// 		if(!err) {
+		// 			global_res.end("upload complete");
+		// 		}
+		// 		else {
+		// 			global_res.send(400, { error: 'upload failed' }); //400 means bad request
+		// 		}
+		// 	});
+		// }
 
 
-			if(err) {
-        		console.log(err);
-        		global_res.send(400, { error: 'upload failed' }); //400 means bad request
-        	}
-        	else {
-        		console.log("no error");
-        		global_res.end("upload complete");
-        	}
-      	
-        });
-		*/
-		fileOptions._id = tokenId;
-		fileOptions.filename = file.name;
-		var writestream = gfs.createWriteStream(fileOptions);
-		fs.createReadStream(file.path).pipe(writestream);
-		writestream.on('close', function (file) {
-		  // do something with `file`
-		  console.log('upload successfully:' + file.filename);
-		  global_res.end("upload complete");
-		});
+		if(err) {
+    		console.log(err);
+    		global_res.send(400, { error: 'upload failed' }); //400 means bad request
+    	}
+    	else {
+    		console.log("no error");
+    		global_res.end("upload complete");
+    	}
+  	
     });
-	/*
-	.on('end', function() {
-		console.log('file uploading finished here');
-		return;
-	});
 	*/
+	if(tokenId) {
+		fileOptions._id = tokenId;
+	}
+	fileOptions.filename = file.name;
+	var writestream = gfs.createWriteStream(fileOptions);
+	fs.createReadStream(file.path).pipe(writestream);
+	writestream.on('close', function (file) {
+	  // do something with `file`
+	  console.log('upload successfully:' + file.filename);
+	  global_res.end("upload complete");
+	});
+});
+/*
+.on('end', function() {
+	console.log('file uploading finished here');
+	return;
+});
+*/
 
 
 //http routing
-app.get("/uploadFile",function (req,res) {
+app.set('view engine','ejs')
+.set('views', frontEndPath + '/ejsTemplates')
+.get("/uploadFile",function (req,res) {
 	res.sendfile(uploadFileHtmlPath); //file upload page
+})
+.get("/checkEmail/:email",function (req,res) {
+	var indexOfEmail = typeformData.emails.indexOf(req.params.email);
+	if(indexOfEmail !== -1) { //found
+		res.send(200, {
+			username: typeformData.names[indexOfEmail],
+			id: typeformData.tokens[indexOfEmail] 
+		});
+	}
+	else {
+		refreshData(function () {
+			var indexOfEmail = typeformData.emails.indexOf(req.params.email);
+			if(indexOfEmail !== -1) { //found
+				res.send(200, {
+					username: typeformData.names[indexOfEmail],
+					id: typeformData.tokens[indexOfEmail] 
+				});
+			}
+			else { //unrecognized email
+				res.send(401, {
+					error: "unrecognized email"
+				});
+			}
+		}); //after refresh,call callback.
+	}
+})
+.get("/uploadFile/:email",function (req,res) {
+	var indexOfEmail = typeformData.emails.indexOf(req.params.email);
+	if(indexOfEmail !== -1) {
+		renderWithData(res,{
+			name: typeformData.names[indexOfEmail],
+			id: typeformData.tokens[indexOfEmail]
+		});
+	}
+	else {
+		refreshData(function () {
+			var indexOfEmail = typeformData.emails.indexOf(req.params.email);
+			if(indexOfEmail !== -1) { //found
+				renderWithData(res,{
+					name: typeformData.names[indexOfEmail],
+					id: typeformData.tokens[indexOfEmail]
+				});
+			}
+			else {
+				res.send(401, {
+					error: "unrecognized email"
+				});
+			}
+		});
+	}
+
 })
 .get("/file/download/:fileId",function (req,res) {
 	
@@ -194,58 +252,53 @@ app.get("/uploadFile",function (req,res) {
 		readstream.pipe(res);
 	}
 	
-
 })
 .get("/username/get/:id",function (req,res) {
-	indexOfToken = tokensAndNames.tokens.indexOf(req.params.id);
+	var indexOfToken = typeformData.tokens.indexOf(req.params.id);
 	if(indexOfToken !== -1) { //find id
-		res.send(200,{ username:tokensAndNames.names[indexOfToken] });
+		res.send(200,{ username:typeformData.names[indexOfToken] });
 	}
 	else {
-		global_req = req;
-		global_res = res;
-		refreshData(getHandlerInUsernameGet);
+		refreshData(function () {
+			var indexOfToken = typeformData.tokens.indexOf(req.params.id);
+			if(indexOfToken !== -1) {
+				res.send(200,{ username:typeformData.names[indexOfToken] });
+			}
+			else {
+				res.send(401,{ error:"unrecognized user" }); //Unauthorized
+			}
+		});
 	}
 })
 .post("/file/upload/:id",function (req,res) {
 	global_res = res;
-	if(tokensAndNames.tokens.indexOf(req.params.id) !== -1) { //find id
+	if(typeformData.tokens.indexOf(req.params.id) !== -1) { //find id
 		tokenId = req.params.id;
 		console.log("start to upload");
     	form.parse(req);
     }
     else {
-    	global_req = req;
-    	refreshData(postHandlerInFileUploadId);
+    	refreshData(function () {
+			if(typeformData.tokens.indexOf(req.params.id) !== -1) {
+				tokenId = req.params.id;
+				console.log("start to upload");
+		    	form.parse(req);
+			}
+			else {
+				res.send(401,{ error:"unrecognized user" }); //Unauthorized
+			}
+		});
     }
 });
 
-var global_req;
-
-function postHandlerInFileUploadId() {
-	if(tokensAndNames.tokens.indexOf(global_req.params.id) !== -1) {
-		tokenId = global_req.params.id;
-		console.log("start to upload");
-    	form.parse(global_req);
-	}
-	else {
-		global_res.send(401,{ error:"unrecognized user" }); //Unauthorized
-	}
-}
-
-var indexOfToken;
-
-function getHandlerInUsernameGet() {
-	indexOfToken = tokensAndNames.tokens.indexOf(global_req.params.id);
-	if(indexOfToken !== -1) {
-		global_res.send(200,{ username:tokensAndNames.names[indexOfToken] });
-	}
-	else {
-		global_res.send(401,{ error:"unrecognized user" }); //Unauthorized
-	}
-}
-
 var tokenId;
+
+function renderWithData (res,user) {
+	res.render('uploadFileWithEmail', {
+		username: user.name,
+		id: user.id
+	});
+}
 
 function serverStartToListen() { //wait for DB connection
 	app.listen(port, function(){
