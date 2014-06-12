@@ -34,7 +34,7 @@
 		// }
 
 		if(slidesDropzone.files.length == maxNumOfFiles) {
-			if(confirm("You're going to replace current file on this page.\nDo you want to do this?") == true) { //pressed OK
+			if(confirm("你即將覆蓋目前的檔案\n確定要這麼做嗎?") == true) { //pressed OK
 				toRemoveFile = true;
 				toAddFile = true;
 				if(event.type === click_EVENT) {
@@ -55,7 +55,6 @@
 		}
 		
 	}
-
 
 	chooseFileButton.on(click_EVENT, dropAndClickEventHandler);
 
@@ -92,8 +91,6 @@
 			    		this.removeFile(file);
 			    	}
 			    	
-			    	//in second branch would be offset in the below event handler
-			    	
 			    	if(this.files.length > 0) {
 			    		uploadButton.css(display_CSSProperty,inlineBlock_CSSValue);
 			    		hintMessage.css(display_CSSProperty,none_CSSValue);
@@ -101,20 +98,22 @@
 
 			    })
 			    .on(removedfile_EVENT, function(file) { 
-
 			    	if(this.files.length === 0) {
 			    		uploadButton.css(display_CSSProperty,none_CSSValue);
 			    		hintMessage.css(display_CSSProperty,inlineBlock_CSSValue);
 			    	}
-			    })
+			    });
+			    /*
 			    .on(success_EVENT, function(file) {
 			    	var template = '<a class="dz-remove" style="margin-top:5px;">download</a>';
-						$(template).appendTo('div.dz-preview').on(click_EVENT,function (event){
+			    	//download button
+						$(template).appendTo('div.dz-preview').on(click_EVENT,function (event){ 
 						var fileName = $('div.dz-filename').find('span').text();
-						window.open(host + '/file/download/' + fileName);
+						window.open(host + '/file/download/');
 
 					});
 			  });
+				*/
 			},
 			
 			addRemoveLinks: false,
@@ -131,8 +130,6 @@
 	$(document).bind('drop dragover', function (e) {
     	e.preventDefault();
 	});
-
-
 
 	// init 
 	function init() {

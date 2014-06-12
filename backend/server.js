@@ -7,6 +7,7 @@ console.log(mongodb_uri);
 
 MongoClient.connect(mongodb_uri, function(err, db) {
 	if(err) {
+		console.log(err);
 		throw err;
 	}
 	console.log('database connection established');
@@ -83,7 +84,14 @@ var typeformData;
 function refreshData(callback) {
 	request(typeformDataApi, function (err,res,body){
 		if (!err && res.statusCode == 200) {
-			jsonData = JSON.parse(body);
+			try {
+				jsonData = JSON.parse(body);
+			}
+			catch (exception) {
+				console.log(exception);
+				throw exception;
+			}
+
 			typeformData = {
 				tokens: [],
 				names: [],
@@ -102,11 +110,20 @@ function refreshData(callback) {
 				callback();
 			}
 		}
+		else {
+			console.log(err);
+			typeformData = {
+				tokens: [null],
+				names: [null],
+				emails: [null],
+				passwords: [null]
+			};
+		}
 	});
 }
 
-var global_res;
-var global_req;
+var global_res=null;
+var global_req=null;
 
 form.on('file', function(field, file) {
     //rename the incoming file to the file's local name
@@ -141,21 +158,26 @@ form.on('file', function(field, file) {
   	
     });
 	*/
-	if(tokenId) {
-		fileOptions._id = tokenId;
+	try {
+		if(tokenId) {
+			fileOptions._id = tokenId;
+		}
+		else {
+			fileOptions._id = null;
+		}
+		fileOptions.filename = file.name;
+		var writestream = gfs.createWriteStream(fileOptions);
+		fs.createReadStream(file.path).pipe(writestream);
+		writestream.on('close', function (file) {
+		  // do something with `file`
+		  console.log('upload successfully:' + file.filename);
+		  global_res.end("upload complete");
+		});
 	}
-	else {
-		fileOptions._id = null;
+	catch (exception) {
+		console.log(exception);
+		global_res.send(500,"server internal error,uploading failed");
 	}
-
-	fileOptions.filename = file.name;
-	var writestream = gfs.createWriteStream(fileOptions);
-	fs.createReadStream(file.path).pipe(writestream);
-	writestream.on('close', function (file) {
-	  // do something with `file`
-	  console.log('upload successfully:' + file.filename);
-	  global_res.end("upload complete");
-	});
 });
 /*
 .on('end', function() {
@@ -171,7 +193,6 @@ app.set('view engine','ejs')
 .get("/auth",function (req,res) {
 	var email = req.query.email;
 	var password = req.query.password;
-	var indexOfEmail = typeformData.emails.indexOf(email);
 	refreshData(function () {
 		var indexOfEmail = typeformData.emails.indexOf(email);
 		if(indexOfEmail !== -1) {
@@ -194,33 +215,6 @@ app.set('view engine','ejs')
 		}
 	});
 });
-/*
-.get("/checkEmail/:email",function (req,res) {
-	var indexOfEmail = typeformData.emails.indexOf(req.params.email);
-	if(indexOfEmail !== -1) { //found
-		res.send(200, {
-			username: typeformData.names[indexOfEmail],
-			id: typeformData.tokens[indexOfEmail] 
-		});
-	}
-	else {
-		refreshData(function () {
-			var indexOfEmail = typeformData.emails.indexOf(req.params.email);
-			if(indexOfEmail !== -1) { //found
-				res.send(200, {
-					username: typeformData.names[indexOfEmail],
-					id: typeformData.tokens[indexOfEmail] 
-				});
-			}
-			else { //unrecognized email
-				res.send(401, {
-					error: "unrecognized email"
-				});
-			}
-		}); //after refresh,call callback.
-	}
-})
-*/
 
 function sendUploadFilePage(req,res) {
 	res.sendfile(uploadFileHtmlPath); //file upload page without email
@@ -229,8 +223,14 @@ function sendUploadFilePage(req,res) {
 app.get("/uploadFile",sendUploadFilePage)
 .get("/uploadFile/:email",sendUploadFilePage)
 .get("/file/download/:fileId",function (req,res) {
-	var readstream = gfs.createReadStream({ _id: req.params.fileId,root: collectionName });
-	readstream.pipe(res);
+	try {
+		var readstream = gfs.createReadStream({ _id: req.params.fileId,root: collectionName });
+		readstream.pipe(res);
+	}
+	catch (exception) {
+		console.log(exception);
+		res.send(500,"unable to download this file");
+	}
 
 	/*
 	if(!s3_isAvailable) {
@@ -267,7 +267,7 @@ app.get("/uploadFile",sendUploadFilePage)
 	});
 });
 
-var tokenId;
+var tokenId = null;
 /*
 function AuthAndRender (res,user) {
 	if(user.realPass.trim() === user.inputPass.trim()) {
