@@ -16,20 +16,28 @@ MongoClient.connect(mongodb_uri, function(err, db) {
 	console.log('database connection established');
 	gfs = Grid(db,mongo);
 	
-	try {
-		db.createCollection(filesDataCollectionName);
-	}
-	catch (exception) {
-		console.log(exception);
-	}
+	var filesCollection = null; 
 
-	try {
-		db.getCollection(filesDataCollectionName).ensureIndex({ tokenId: ascendingOrder },{ unique: true,sparse: true }); 
-	}
-	catch (exception) {
-		console.log(exception);
-	}
+	db.createCollection(filesDataCollectionName,function (err,collection){
+		if(!err) {
+			filesCollection = collection;
+		}
+		else {
+			console.log(err);
+			filesCollection = db.collection(filesDataCollectionName);
+		}
+	});
 
+	
+	filesCollection.createIndex('tokenId',null,function (err, indexName) {
+		if(!err) {
+			console.log('create index:' + indexName + ' successfully');
+		}
+		else {
+			console.log(err);
+		}
+	}); 
+	
 	serverStartToListen();
 });
 
