@@ -31,7 +31,7 @@
 	}
 
 	function dropAndClickEventHandler(event) {
-		if(slidesDropzone.files.length > maxNumOfFiles) {
+		if(slidesDropzone.files.length >= maxNumOfFiles) {
 			if(confirm("你即將覆蓋目前的檔案\n確定要這麼做嗎?") == true) { //pressed OK
 				toRemoveFile = true;
 				toAddFile = true;
@@ -65,7 +65,7 @@
 	}
 
 	chooseFileButton.on(click_EVENT, dropAndClickEventHandler);
-	chooseFileButton.on(click_EVENT, setGlobalAddFileEvent);
+	//chooseFileButton.on(click_EVENT, setGlobalAddFileEvent);
 
 	var slidesDropzone = new Dropzone(document.body,
 		{ 
