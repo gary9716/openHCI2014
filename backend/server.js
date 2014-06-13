@@ -27,7 +27,7 @@ MongoClient.connect(mongodb_uri, function(err, db) {
 			originalCollection = db.collection(collectionName);
 		}
 
-		originalCollection.createIndex('tokenId',{ w:noAckOfWrite,unique: true,sparse: true },function (err, indexName) {
+		originalCollection.ensureIndex('tokenId',{ w: noAckOfWrite,unique: true,sparse: true },function (err, indexName) {
 			if(!err) {
 				console.log('create index:' + indexName + ' successfully');
 			}
