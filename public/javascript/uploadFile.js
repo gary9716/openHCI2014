@@ -65,7 +65,7 @@
 	}
 
 	chooseFileButton.on(click_EVENT, dropAndClickEventHandler);
-	//chooseFileButton.on(click_EVENT, setGlobalAddFileEvent);
+	chooseFileButton.on(click_EVENT, setGlobalAddFileEvent);
 
 	var slidesDropzone = new Dropzone(document.body,
 		{ 
@@ -91,10 +91,12 @@
 				.on(drop_EVENT, setGlobalAddFileEvent)
 				//.on(drop_EVENT, dropAndClickEventHandler)
 			    .on(addedFile_EVENT, function(file) {
-
+			    	console.log('event:' + global_addFile_event.type);
 			    	if(global_addFile_event.type === drop_EVENT) {
 			    		dropAndClickEventHandler(global_addFile_event);
 			    	}
+			    	
+			    	console.log('toRemoveFile:' + toRemoveFile);
 
 			    	if(toRemoveFile) {
 			    		this.removeFile(this.files[0]); //trigger removeFile event and update UI
