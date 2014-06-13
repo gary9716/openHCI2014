@@ -271,7 +271,7 @@ form.on('file', function(field, file) {
 		var uploadFileId = null;
 		if(tokenId) {
 			originalCollection.findOne({ tokenId: tokenId },function (err,doc) {
-				if(!err) { //found
+				if(!err && doc.fileId) { //found
 					uploadFileId = doc.fileId;
 				}
 				else { //not found
@@ -292,27 +292,29 @@ form.on('file', function(field, file) {
 												}
 											});
 				}
+
+				fileOptions._id = uploadFileId;
+				fileOptions.filename = file.name;
+				/*
+				fileOptions.metadata = {
+					realFileName: file.name;
+				};
+				*/
+				var writestream = gfs.createWriteStream(fileOptions);
+				fs.createReadStream(file.path).pipe(writestream);
+				writestream.on('close', function (file) {
+				  // do something with `file`
+				  console.log('upload successfully:' + file.filename);
+				  global_res.end("upload complete");
+				});
+			
 			});	
 		}
 		else {
 			console.log('no token id for ' + file.name + ',just generate id and not save it');
-			uploadFileId = new ObjectId();
+			global_res.send(400,"no user id");
 		}
 
-		fileOptions._id = uploadFileId;
-		fileOptions.filename = file.name;
-		/*
-		fileOptions.metadata = {
-			realFileName: file.name;
-		};
-		*/
-		var writestream = gfs.createWriteStream(fileOptions);
-		fs.createReadStream(file.path).pipe(writestream);
-		writestream.on('close', function (file) {
-		  // do something with `file`
-		  console.log('upload successfully:' + file.filename);
-		  global_res.end("upload complete");
-		});
 	}
 	catch (exception) {
 		console.log(exception);
