@@ -1,4 +1,5 @@
 var mongo = require('mongodb');
+var ObjectID = mongo.ObjectID;
 var MongoClient = mongo.MongoClient;
 var Grid = require('gridfs-stream');
 var mongodb_uri = process.env.MONGOLAB_URI || 'mongodb://localhost/test';
@@ -271,12 +272,12 @@ form.on('file', function(field, file) {
 		var uploadFileId = null;
 		if(tokenId) {
 			originalCollection.findOne({ tokenId: tokenId },function (err,doc) {
-				if(!err && doc != null && doc.fileId) { //found
+				if(!err && doc !== null && doc.fileId) { //found
 					console.log('found:'+doc.fileId);
 					uploadFileId = doc.fileId;
 				}
 				else { //not found
-					uploadFileId = new ObjectId();
+					uploadFileId = new ObjectID();
 					console.log('new generate:'+uploadFileId);
 					originalCollection.save({ tokenId: tokenId,fileId: uploadFileId },
 											{ w: noAckOfWrite },
