@@ -21,11 +21,12 @@
 	//var hintMessage = $('h1#hint_message');
 	var chooseFileButton = $('button#clickable');
 	var hiddenDiv = $('div#hidden_area');
-	var toOverride = false;
+	var toUpload = false;
 
 	var global_addFile_event;
 	
 	function setGlobalAddFileEvent(event) {
+		console.log('setEvent');
 		global_addFile_event = event;
 	}
 
@@ -35,7 +36,7 @@
 			if(confirm("你即將覆蓋目前的檔案\n確定要這麼做嗎?") == true) { //pressed OK
 				toRemoveFile = true;
 				toAddFile = true;
-				toOverride = true;
+				toUpload = true;
 				if(event.type === click_EVENT) {
 					hiddenDiv.trigger(click_EVENT); //after this event would trigger addedFile
 				}
@@ -43,18 +44,25 @@
 			else { //pressed cancel
 				toRemoveFile = false;
 				toAddFile = false;
-				toOverride = false;
+				toUpload = false;
 			}
 		}
 		else {
 			toRemoveFile = false;
 			toAddFile = true;
-			toOverride = true;
+			toUpload = true;
 			if(event.type === click_EVENT) {
 				hiddenDiv.trigger(click_EVENT); //after this event would trigger addedFile
 			}
 		}
-		
+			
+		setWelcomeMessage(null);
+	}
+
+	function setWelcomeMessage(file) {
+	    if(toUpload) {
+	    	$('#pass-area .info').text('Hello, ' + username);
+		}
 	}
 
 	chooseFileButton.on(click_EVENT, dropAndClickEventHandler);
@@ -82,12 +90,13 @@
 				
 				this
 				.on(drop_EVENT, setGlobalAddFileEvent)
-			    .on(addedFile_EVENT, function(file) { 
+				//.on(drop_EVENT, dropAndClickEventHandler)
+			    .on(addedFile_EVENT, function(file) {
+			    	console.log('addedFile');
 			    	if(global_addFile_event.type === drop_EVENT) {
+			    		this.removeFile(file);
 			    		dropAndClickEventHandler(global_addFile_event);
-			    	}
-
-			    	setWelcomeMessage(file);
+			    	}		    	
 
 			    	if(toRemoveFile) {
 			    		this.removeFile(this.files[0]); //trigger removeFile event and update UI
@@ -147,12 +156,6 @@
 	}
 	init();
 	
-	function setWelcomeMessage(file) {
-	    if(toOverride) {
-	    	$('#pass-area .info').text('Hello, ' + username);
-		}
-	}
-
 	function setUploadSucceedMessage(file) {
 	    $('#pass-area .info').text('Hello, ' + username + ' 檔案已上傳成功！');
 	}
