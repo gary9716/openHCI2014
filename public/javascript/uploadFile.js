@@ -30,20 +30,12 @@
 		global_addFile_event = event;
 	}
 
-	var standard = {
-		click_EVENT: 0,
-		drop_EVENT: -1,
-	};
-
-	function dropAndClickEventHandler(event) {
-		if(slidesDropzone.files.length + standard[global_addFile_event] >= maxNumOfFiles) {
+	function dropEventHandler (event) {
+		if(slidesDropzone.files.length > maxNumOfFiles) {
 			if(confirm("你即將覆蓋目前的檔案\n確定要這麼做嗎?") == true) { //pressed OK
 				toRemoveFile = true;
 				toAddFile = true;
 				toUpload = true;
-				if(event.type === click_EVENT) {
-					hiddenDiv.trigger(click_EVENT); //after this event would trigger addedFile
-				}
 			}
 			else { //pressed cancel
 				toRemoveFile = false;
@@ -55,9 +47,30 @@
 			toRemoveFile = false;
 			toAddFile = true;
 			toUpload = true;
-			if(event.type === click_EVENT) {
+		}
+			
+		setWelcomeMessage(null);
+	}
+
+	function clickEventHandler (event) {
+		if(slidesDropzone.files.length === maxNumOfFiles) {
+			if(confirm("你即將覆蓋目前的檔案\n確定要這麼做嗎?") == true) { //pressed OK
+				toRemoveFile = true;
+				toAddFile = true;
+				toUpload = true;
 				hiddenDiv.trigger(click_EVENT); //after this event would trigger addedFile
 			}
+			else { //pressed cancel
+				toRemoveFile = false;
+				toAddFile = false;
+				toUpload = false;
+			}
+		}
+		else {
+			toRemoveFile = false;
+			toAddFile = true;
+			toUpload = true;
+			hiddenDiv.trigger(click_EVENT); //after this event would trigger addedFile
 		}
 			
 		setWelcomeMessage(null);
@@ -69,7 +82,7 @@
 		}
 	}
 
-	chooseFileButton.on(click_EVENT, dropAndClickEventHandler);
+	chooseFileButton.on(click_EVENT, clickEventHandler);
 	chooseFileButton.on(click_EVENT, setGlobalAddFileEvent);
 
 	var slidesDropzone = new Dropzone(document.body,
@@ -95,13 +108,11 @@
 				this
 				.on(drop_EVENT, setGlobalAddFileEvent)
 			    .on(addedFile_EVENT, function(file) {
-			    	console.log('event:' + global_addFile_event.type);
+			    	//console.log('event:' + global_addFile_event.type);
 			    	if(global_addFile_event.type === drop_EVENT) {
-			    		dropAndClickEventHandler(global_addFile_event);
+			    		dropEventHandler(global_addFile_event);
 			    	}
 			    	
-			    	console.log('toRemoveFile:' + toRemoveFile);
-
 			    	if(toRemoveFile) {
 			    		this.removeFile(this.files[0]); //trigger removeFile event and update UI
 			    	}
