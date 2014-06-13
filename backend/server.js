@@ -4,10 +4,12 @@ var Grid = require('gridfs-stream');
 var mongodb_uri = process.env.MONGOLAB_URI || 'mongodb://localhost/test';
 var collectionName = 'registerdata';
 var filesDataCollectionName = collectionName + '.files';
+var originalCollection = null; 
+
 console.log(mongodb_uri);
 
 const ascendingOrder = 1;
-
+const noAckOfWrite = 1;
 MongoClient.connect(mongodb_uri, function(err, db) {
 	if(err) {
 		console.log(err);
@@ -16,18 +18,16 @@ MongoClient.connect(mongodb_uri, function(err, db) {
 	console.log('database connection established');
 	gfs = Grid(db,mongo);
 	
-	var filesCollection = null; 
-
-	db.createCollection(filesDataCollectionName,function (err,collection){
+	db.createCollection(collectionName,function (err,collection){
 		if(!err) {
-			filesCollection = collection;
+			originalCollection = collection;
 		}
 		else {
 			console.log(err);
-			filesCollection = db.collection(filesDataCollectionName);
+			originalCollection = db.collection(collectionName);
 		}
 
-		filesCollection.createIndex('tokenId',null,function (err, indexName) {
+		originalCollection.createIndex('tokenId',{ w:noAckOfWrite,unique: true,sparse: true },function (err, indexName) {
 			if(!err) {
 				console.log('create index:' + indexName + ' successfully');
 			}
@@ -38,7 +38,7 @@ MongoClient.connect(mongodb_uri, function(err, db) {
 	
 		serverStartToListen();
 	});
-	
+
 });
 
 var gfs;
@@ -189,14 +189,21 @@ function sendUploadFilePage(req,res) {
 
 app.get("/uploadFile",sendUploadFilePage)
 .get("/uploadFile/:email",sendUploadFilePage)
-.get("/file/download/:fileId",function (req,res) {
+.get("/file/download/:tokenId",function (req,res) {
 	try {
-		var readstream = gfs.createReadStream({ 
-			_id: new ObjectId.createFromHexString(req.params.fileId),
-			mode: 'r',
-			root: collectionName 
+		originalCollection.findOne({ tokenId: req.params.tokenId },function (err,doc) { 
+			if(!err) {
+				var readstream = gfs.createReadStream({ 
+					_id: doc.fileId,
+					mode: 'r',
+					root: collectionName 
+				});
+				readstream.pipe(res);
+			}
+			else {
+				res.send(404,"file not found");
+			}
 		});
-		readstream.pipe(res);
 	}
 	catch (exception) {
 		console.log(exception);
@@ -261,16 +268,39 @@ form.on('file', function(field, file) {
 	try {
 		//_id left to system auto-generate
 		//put real file name into metadata's realFileName field and set filename field to tokenId
+		var uploadFileId = null;
 		if(tokenId) {
-			//fileOptions.filename = tokenId;
-			fileOptions.tokenId = tokenId;
-			fileOptions.filename = file.name;	
+			originalCollection.findOne({ tokenId: tokenId },function (err,doc) {
+				if(!err) { //found
+					uploadFileId = doc.fileId;
+				}
+				else { //not found
+					uploadFileId = new ObjectId();
+					originalCollection.save({ tokenId: tokenId,fileId: uploadFileId },
+											{ w: noAckOfWrite },
+											function (err,record) {
+												if(!err) {
+													if(record === 1) {
+														console.log('updated fileId in /file/upload/' + tokenId);
+													}
+													else {
+														console.log(record);
+													}
+												}
+												else {
+													console.log(err);
+												}
+											});
+				}
+			});	
 		}
 		else {
-			console.log('no token id for ' + file.name + ',set to real filename');
-			fileOptions.tokenId = null;
-			fileOptions.filename = file.name;
+			console.log('no token id for ' + file.name + ',just generate id and not save it');
+			uploadFileId = new ObjectId();
 		}
+
+		fileOptions._id = uploadFileId;
+		fileOptions.filename = file.name;
 		/*
 		fileOptions.metadata = {
 			realFileName: file.name;
