@@ -23,6 +23,7 @@ e. Others
 @import url("fonts.css");
 @import url("fontello/css/fontello.css");
 @import url("font-awesome/css/font-awesome.min.css");
+@import url("http://fonts.googleapis.com/css?family=Crete+Round");
 
 /* ------------------------------------------------------------------
 /* b. Reset
@@ -137,7 +138,8 @@ html {
 
 body {
    background: #fff;
-   font-family: 'opensans-regular', sans-serif;
+   /*font-family: 'opensans-regular', sans-serif;*/
+   font-family: 'Crete Round', sans-serif;
    font-weight: normal;
    font-size: 15px;
    line-height: 30px;
@@ -153,7 +155,8 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
    color: #313131;
-	font-family: 'opensans-bold', sans-serif;
+	/*font-family: 'opensans-bold', sans-serif;*/
+   font-family: 'Crete Round', sans-serif;
    font-weight: normal;
 }
 h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { font-weight: inherit; }
