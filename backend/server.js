@@ -15,13 +15,21 @@ MongoClient.connect(mongodb_uri, function(err, db) {
 	}
 	console.log('database connection established');
 	gfs = Grid(db,mongo);
+	
 	try {
 		db.createCollection(filesDataCollectionName);
-		db[filesDataCollectionName].ensureIndex({ fileId: ascendingOrder },{ unique: true,sparse: true }); 
 	}
 	catch (exception) {
 		console.log(exception);
 	}
+
+	try {
+		db[filesDataCollectionName].ensureIndex({ tokenId: ascendingOrder },{ unique: true,sparse: true }); 
+	}
+	catch (exception) {
+		console.log(exception);
+	}
+
 	serverStartToListen();
 });
 
@@ -246,15 +254,20 @@ form.on('file', function(field, file) {
 		//_id left to system auto-generate
 		//put real file name into metadata's realFileName field and set filename field to tokenId
 		if(tokenId) {
-			fileOptions.filename = tokenId;	
+			//fileOptions.filename = tokenId;
+			fileOptions.tokenId = tokenId;
+			fileOptions.filename = file.name;	
 		}
 		else {
 			console.log('no token id for ' + file.name + ',set to real filename');
+			fileOptions.tokenId = null;
 			fileOptions.filename = file.name;
 		}
+		/*
 		fileOptions.metadata = {
 			realFileName: file.name;
 		};
+		*/
 		var writestream = gfs.createWriteStream(fileOptions);
 		fs.createReadStream(file.path).pipe(writestream);
 		writestream.on('close', function (file) {
