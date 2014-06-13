@@ -273,7 +273,7 @@ form.on('file', function(field, file) {
 		var uploadFileId = null;
 		if(tokenId) {
 			originalCollection.findOne({ tokenId: tokenId },function (err,doc) {
-				if(!err && doc !== null && doc.fileId) { //found
+				if(!err && doc !== null && doc.fileId !== null && doc.fileId !== undefined) { //found
 					console.log('found:'+doc.fileId);
 					uploadFileId = doc.fileId;
 				}
