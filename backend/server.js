@@ -24,7 +24,7 @@ MongoClient.connect(mongodb_uri, function(err, db) {
 	}
 
 	try {
-		db[filesDataCollectionName].ensureIndex({ tokenId: ascendingOrder },{ unique: true,sparse: true }); 
+		db.registerdata.files.ensureIndex({ tokenId: ascendingOrder },{ unique: true,sparse: true }); 
 	}
 	catch (exception) {
 		console.log(exception);
