@@ -66,7 +66,7 @@
 				Eg.: image/*,application/pdf,.psd. If the Dropzone is clickable 
 				this option will be used as accept parameter on the hidden file input as well.
 			*/
-			//acceptedFiles:,
+			acceptedFiles:"application/pdf",
 			
 			init: function() {
 				

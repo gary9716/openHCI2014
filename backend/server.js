@@ -3,7 +3,10 @@ var MongoClient = mongo.MongoClient;
 var Grid = require('gridfs-stream');
 var mongodb_uri = process.env.MONGOLAB_URI || 'mongodb://localhost/test';
 var collectionName = 'registerdata';
+var filesDataCollectionName = collectionName + '.files';
 console.log(mongodb_uri);
+
+const ascendingOrder = 1;
 
 MongoClient.connect(mongodb_uri, function(err, db) {
 	if(err) {
@@ -12,7 +15,13 @@ MongoClient.connect(mongodb_uri, function(err, db) {
 	}
 	console.log('database connection established');
 	gfs = Grid(db,mongo);
-	//refreshData(serverStartToListen);
+	try {
+		db.createCollection(filesDataCollectionName);
+		db[filesDataCollectionName].ensureIndex({ fileId: ascendingOrder },{ unique: true,sparse: true }); 
+	}
+	catch (exception) {
+		console.log(exception);
+	}
 	serverStartToListen();
 });
 
@@ -234,14 +243,18 @@ form.on('file', function(field, file) {
     });
 	*/
 	try {
+		//_id left to system auto-generate
+		//put real file name into metadata's realFileName field and set filename field to tokenId
 		if(tokenId) {
-			fileOptions._id = new ObjectId.createFromHexString(tokenId);
+			fileOptions.filename = tokenId;	
 		}
 		else {
-			console.log('no token id for ' + file.name + '');
-			fileOptions._id = null;
+			console.log('no token id for ' + file.name + ',set to real filename');
+			fileOptions.filename = file.name;
 		}
-		fileOptions.filename = file.name;
+		fileOptions.metadata = {
+			realFileName: file.name;
+		};
 		var writestream = gfs.createWriteStream(fileOptions);
 		fs.createReadStream(file.path).pipe(writestream);
 		writestream.on('close', function (file) {
