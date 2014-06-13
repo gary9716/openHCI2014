@@ -26,19 +26,19 @@ MongoClient.connect(mongodb_uri, function(err, db) {
 			console.log(err);
 			filesCollection = db.collection(filesDataCollectionName);
 		}
-	});
 
+		filesCollection.createIndex('tokenId',null,function (err, indexName) {
+			if(!err) {
+				console.log('create index:' + indexName + ' successfully');
+			}
+			else {
+				console.log(err);
+			}
+		}); 
 	
-	filesCollection.createIndex('tokenId',null,function (err, indexName) {
-		if(!err) {
-			console.log('create index:' + indexName + ' successfully');
-		}
-		else {
-			console.log(err);
-		}
-	}); 
+		serverStartToListen();
+	});
 	
-	serverStartToListen();
 });
 
 var gfs;
