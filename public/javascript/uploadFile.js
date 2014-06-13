@@ -1,7 +1,5 @@
 (function (){
 	var host = window.location.origin;
-	//var host = 'http://openhci2014.herokuapp.com'
-
 	var drop_EVENT = "drop";
 	var addedFile_EVENT = "addedfile";
 	var removedfile_EVENT = "removedfile";
@@ -25,14 +23,7 @@
 	var hiddenDiv = $('div#hidden_area');
 
 	function dropAndClickEventHandler(event) {
-		
-		//to solve an bug that body's click would be triggered twice within an click event		
-		// numBodyClicked++;
-		// if(event.type === click_EVENT && numBodyClicked === 2) { 
-		// 	numBodyClicked = 0;
-		// 	return;
-		// }
-
+	
 		if(slidesDropzone.files.length == maxNumOfFiles) {
 			if(confirm("你即將覆蓋目前的檔案\n確定要這麼做嗎?") == true) { //pressed OK
 				toRemoveFile = true;
@@ -136,7 +127,7 @@
 		uploadButton.hide();
 		slidesDropzone.disable();
 
-		if(window.location.pathname.split('/').length === 3 && window.location.pathname.split('/')[1] === 'uploadfile') {
+		if(window.location.pathname.split('/').length === 3 && window.location.pathname.split('/')[1] === 'uploadFile') {
 			$('input#email-input').val(window.location.pathname.split('/')[2]);
 		}
 	}

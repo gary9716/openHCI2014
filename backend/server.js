@@ -125,6 +125,81 @@ function refreshData(callback) {
 var global_res=null;
 var global_req=null;
 
+//http routing
+app.set('view engine','ejs')
+.set('views', frontEndPath + '/ejsTemplates')
+//.get("/auth/:email/:password",function (req,res) {
+.get("/auth",function (req,res) {
+	//console.log('start to auth');
+	var email = req.query.email;
+	var password = req.query.password;
+	refreshData(function () {
+		var indexOfEmail = typeformData.emails.indexOf(email);
+		if(indexOfEmail !== -1) {
+			//console.log("real pass:" + typeformData.passwords[indexOfEmail]);
+			//console.log("input pass:" + password);
+			if(typeformData.passwords[indexOfEmail] === password) {
+				res.send(200,{
+					username: typeformData.names[indexOfEmail],
+					id: typeformData.tokens[indexOfEmail]
+				});
+			}
+			else {
+				res.send(401,{
+					error: "incorrect password"
+				});
+			}
+		}
+		else {
+			res.send(401, {
+				error: "authentication failed"
+			});
+		}
+	});
+});
+
+function sendUploadFilePage(req,res) {
+	res.sendfile(uploadFileHtmlPath); //file upload page without email
+}
+
+app.get("/uploadFile",sendUploadFilePage)
+.get("/uploadFile/:email",sendUploadFilePage)
+.get("/file/download/:fileId",function (req,res) {
+	try {
+		var readstream = gfs.createReadStream({ 
+			_id: new ObjectId.createFromHexString(req.params.fileId),
+			mode: 'r',
+			root: collectionName 
+		});
+		readstream.pipe(res);
+	}
+	catch (exception) {
+		console.log(exception);
+		res.send(500,"unable to download this file");
+	}
+
+	/*
+	if(!s3_isAvailable) {
+		
+	}
+	else { 
+		 s3_client.getFile(req.params.fileName, function (err,res) {
+		 	console.log(res);
+		 	res.resume();
+		 });
+	}
+
+	res.download(form.uploadDir + "/" + req.params.fileId,
+				 req.params.fileId,
+				 function (err) {
+				 	if(err) {
+				 		console.log(err);
+				 	}
+				 }
+	);
+	*/
+});
+
 form.on('file', function(field, file) {
     //rename the incoming file to the file's local name
     /*
@@ -160,10 +235,10 @@ form.on('file', function(field, file) {
 	*/
 	try {
 		if(tokenId) {
-			fileOptions._id = tokenId;
+			fileOptions._id = new ObjectId.createFromHexString(tokenId);
 		}
 		else {
-			console.log('no token id for ' + file.name);
+			console.log('no token id for ' + file.name + '');
 			fileOptions._id = null;
 		}
 		fileOptions.filename = file.name;
@@ -187,86 +262,16 @@ form.on('file', function(field, file) {
 });
 */
 
-
-//http routing
-app.set('view engine','ejs')
-.set('views', frontEndPath + '/ejsTemplates')
-//.get("/auth/:email/:password",function (req,res) {
-.get("/auth",function (req,res) {
-	console.log('start to auth');
-	var email = req.query.email;
-	var password = req.query.password;
-	refreshData(function () {
-		var indexOfEmail = typeformData.emails.indexOf(email);
-		if(indexOfEmail !== -1) {
-			console.log("real pass:" + typeformData.passwords[indexOfEmail]);
-			console.log("input pass:" + password);
-			if(typeformData.passwords[indexOfEmail] === password) {
-				res.send(200,{
-					username: typeformData.names[indexOfEmail],
-					id: typeformData.tokens[indexOfEmail]
-				});
-			}
-			else {
-				res.send(401,{
-					error: "incorrect password"
-				});
-			}
-		}
-		else {
-			res.send(401, {
-				error: "authentication failed"
-			});
-		}
-	});
-});
-
-function sendUploadFilePage(req,res) {
-	res.sendfile(uploadFileHtmlPath); //file upload page without email
-}
-
-app.get("/uploadFile",sendUploadFilePage)
-.get("/uploadFile/:email",sendUploadFilePage)
-.get("/file/download/:fileId",function (req,res) {
-	try {
-		var readstream = gfs.createReadStream({ 
-			_id: req.params.fileId,
-			mode: 'r',
-			root: collectionName 
-		});
-		readstream.pipe(res);
-	}
-	catch (exception) {
-		console.log(exception);
-		res.send(500,"unable to download this file");
-	}
-
-	/*
-	if(!s3_isAvailable) {
-		
-	}
-	else { 
-		 s3_client.getFile(req.params.fileName, function (err,res) {
-		 	console.log(res);
-		 	res.resume();
-		 });
-	}
-
-	res.download(form.uploadDir + "/" + req.params.fileId,
-				 req.params.fileId,
-				 function (err) {
-				 	if(err) {
-				 		console.log(err);
-				 	}
-				 }
-	);
-	*/
-})
-.post("/file/upload/:id",function (req,res) {
+app.post("/file/upload/:id",function (req,res) {
 	global_res = res;
 	refreshData(function () {
 		if(typeformData.tokens.indexOf(req.params.id) !== -1) {
-			tokenId = req.params.id;
+			if(req.params.id) {
+				tokenId = req.params.id;
+			}
+			else {
+				tokenId = null;
+			}
 			console.log("start to upload with id:" + tokenId);
 	    	form.parse(req);
 		}
@@ -277,19 +282,6 @@ app.get("/uploadFile",sendUploadFilePage)
 });
 
 var tokenId = null;
-/*
-function AuthAndRender (res,user) {
-	if(user.realPass.trim() === user.inputPass.trim()) {
-		res.render('uploadFileWithEmail', {
-			username: user.name,
-			id: user.id
-		});
-	}
-	else {
-		res.send(401,{ error: "incorrect password" });
-	}
-}
-*/
 function serverStartToListen() { //wait for DB connection
 	app.listen(port, function(){
 	    console.log('Listening on ' + String(port));
