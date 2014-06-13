@@ -92,11 +92,10 @@
 				.on(drop_EVENT, setGlobalAddFileEvent)
 				//.on(drop_EVENT, dropAndClickEventHandler)
 			    .on(addedFile_EVENT, function(file) {
-			    	console.log('addedFile');
+
 			    	if(global_addFile_event.type === drop_EVENT) {
-			    		this.removeFile(file);
 			    		dropAndClickEventHandler(global_addFile_event);
-			    	}		    	
+			    	}
 
 			    	if(toRemoveFile) {
 			    		this.removeFile(this.files[0]); //trigger removeFile event and update UI
