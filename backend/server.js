@@ -86,6 +86,7 @@ var s3_bucket = process.env.S3_BUCKET_NAME;
 var s3_isAvailable;
 var s3_client;
 
+/*
 if(!s3_access_key_id || !s3_secret_access_key || !s3_username || !s3_password || !s3_bucket) {
 	console.log('s3 is unavailable');
 	s3_isAvailable = false;
@@ -102,7 +103,7 @@ else {
 	});
 
 }
-
+*/
 var typeformDataApi = process.env.TYPEFORM_DATAAPI;
 var request = require('request');
 var typeformData;
