@@ -23,6 +23,12 @@
 	var hiddenDiv = $('div#hidden_area');
 	var toOverride = false;
 
+	var global_addFile_event;
+	
+	function setGlobalAddFileEvent(event) {
+		global_addFile_event = event;
+	}
+
 	function dropAndClickEventHandler(event) {
 	
 		if(slidesDropzone.files.length == maxNumOfFiles) {
@@ -52,6 +58,7 @@
 	}
 
 	chooseFileButton.on(click_EVENT, dropAndClickEventHandler);
+	chooseFileButton.on(click_EVENT, setGlobalAddFileEvent);
 
 	var slidesDropzone = new Dropzone(document.body,
 		{ 
@@ -74,8 +81,13 @@
 			init: function() {
 				
 				this
-				.on(drop_EVENT, dropAndClickEventHandler)
+				.on(drop_EVENT, setGlobalAddFileEvent)
 			    .on(addedFile_EVENT, function(file) { 
+			    	if(global_addFile_event.type === drop_EVENT) {
+			    		dropAndClickEventHandler(global_addFile_event);
+			    	}
+
+			    	setWelcomeMessage(file);
 
 			    	if(toRemoveFile) {
 			    		this.removeFile(this.files[0]); //trigger removeFile event and update UI
@@ -135,6 +147,18 @@
 	}
 	init();
 	
+	function setWelcomeMessage(file) {
+	    if(toOverride) {
+	    	$('#pass-area .info').text('Hello, ' + username);
+		}
+	}
+
+	function setUploadSucceedMessage(file) {
+	    $('#pass-area .info').text('Hello, ' + username + ' 檔案已上傳成功！');
+	}
+
+	var username = null;
+
 	// confirm email click function
 	$('#confirm-email').click(function(){
 		var inputEmail = $('input#email-input').val().trim();
@@ -151,15 +175,9 @@
 				$('#pass-area').fadeIn();
 				slidesDropzone.enable();
 				slidesDropzone.options.url = '/file/upload/'+res.id;
-
-				slidesDropzone.on("addedfile", function(file) {
-				    if(toOverride) {
-				    	$('#pass-area .info').text('Hello, '+res.username);
-					}
-				});
-				slidesDropzone.on("success", function(file) {
-				    $('#pass-area .info').text('Hello, '+res.username+' 檔案已上傳成功！');
-				});
+				username = res.username;
+				//slidesDropzone.on("addedfile", setWelcomeMessage); //move into another listener
+				slidesDropzone.on("success", setUploadSucceedMessage);
 
 			})
 			.fail(function(error) {
