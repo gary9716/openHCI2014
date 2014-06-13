@@ -30,8 +30,13 @@
 		global_addFile_event = event;
 	}
 
+	var standard = {
+		click_EVENT: 0,
+		drop_EVENT: -1,
+	};
+
 	function dropAndClickEventHandler(event) {
-		if(slidesDropzone.files.length >= maxNumOfFiles) {
+		if(slidesDropzone.files.length + standard[global_addFile_event] >= maxNumOfFiles) {
 			if(confirm("你即將覆蓋目前的檔案\n確定要這麼做嗎?") == true) { //pressed OK
 				toRemoveFile = true;
 				toAddFile = true;
@@ -89,7 +94,6 @@
 				
 				this
 				.on(drop_EVENT, setGlobalAddFileEvent)
-				//.on(drop_EVENT, dropAndClickEventHandler)
 			    .on(addedFile_EVENT, function(file) {
 			    	console.log('event:' + global_addFile_event.type);
 			    	if(global_addFile_event.type === drop_EVENT) {
