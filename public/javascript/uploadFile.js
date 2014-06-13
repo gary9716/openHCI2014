@@ -87,14 +87,12 @@
 			    	
 			    	if(this.files.length > 0) {
 			    		uploadButton.css(display_CSSProperty,inlineBlock_CSSValue);
-			    		//hintMessage.css(display_CSSProperty,none_CSSValue);
 			    	}
 
 			    })
 			    .on(removedfile_EVENT, function(file) { 
 			    	if(this.files.length === 0) {
 			    		uploadButton.css(display_CSSProperty,none_CSSValue);
-			    		//hintMessage.css(display_CSSProperty,inlineBlock_CSSValue);
 			    	}
 			    });
 			    /*
@@ -117,6 +115,7 @@
 	);
 
 	uploadButton.css(display_CSSProperty,none_CSSValue).on(click_EVENT,function (event){
+		console.log(this.files);
 		slidesDropzone.processQueue();
 	});
 	
@@ -165,7 +164,7 @@
 			})
 			.fail(function(error) {
 				$('#confirm-email').text('確認');
-		    $('#error-message').text('無效的電子郵件或密碼').fadeIn();
+		    	$('#error-message').text('無效的電子郵件或密碼').fadeIn();
 				setTimeout(function(){
 					$('#error-message').text('').hide();
 				}, 5000);	
