@@ -115,7 +115,7 @@
 	);
 
 	uploadButton.css(display_CSSProperty,none_CSSValue).on(click_EVENT,function (event){
-		console.log(this.files);
+		console.log(slidesDropzone.files);
 		slidesDropzone.processQueue();
 	});
 	
