@@ -18,9 +18,10 @@
 	var toAddFile = false;
 	var toRemoveFile = false;
 	var uploadButton = $('button#uploadToServer');
-	var hintMessage = $('h1#hint_message');
+	//var hintMessage = $('h1#hint_message');
 	var chooseFileButton = $('button#clickable');
 	var hiddenDiv = $('div#hidden_area');
+	var toOverride = false;
 
 	function dropAndClickEventHandler(event) {
 	
@@ -28,6 +29,7 @@
 			if(confirm("你即將覆蓋目前的檔案\n確定要這麼做嗎?") == true) { //pressed OK
 				toRemoveFile = true;
 				toAddFile = true;
+				toOverride = true;
 				if(event.type === click_EVENT) {
 					hiddenDiv.trigger(click_EVENT); //after this event would trigger addedFile
 				}
@@ -35,11 +37,13 @@
 			else { //pressed cancel
 				toRemoveFile = false;
 				toAddFile = false;
+				toOverride = false;
 			}
 		}
 		else {
 			toRemoveFile = false;
 			toAddFile = true;
+			toOverride = true;
 			if(event.type === click_EVENT) {
 				hiddenDiv.trigger(click_EVENT); //after this event would trigger addedFile
 			}
@@ -51,7 +55,6 @@
 
 	var slidesDropzone = new Dropzone(document.body,
 		{ 
-			//clickable: false,
 			clickable: "div#hidden_area", // Define the element that should be used as click trigger to select files.
 			paramName: "file",
 			url: "/file/upload",
@@ -84,14 +87,14 @@
 			    	
 			    	if(this.files.length > 0) {
 			    		uploadButton.css(display_CSSProperty,inlineBlock_CSSValue);
-			    		hintMessage.css(display_CSSProperty,none_CSSValue);
+			    		//hintMessage.css(display_CSSProperty,none_CSSValue);
 			    	}
 
 			    })
 			    .on(removedfile_EVENT, function(file) { 
 			    	if(this.files.length === 0) {
 			    		uploadButton.css(display_CSSProperty,none_CSSValue);
-			    		hintMessage.css(display_CSSProperty,inlineBlock_CSSValue);
+			    		//hintMessage.css(display_CSSProperty,inlineBlock_CSSValue);
 			    	}
 			    });
 			    /*
@@ -151,11 +154,13 @@
 				slidesDropzone.options.url = '/file/upload/'+res.id;
 
 				slidesDropzone.on("addedfile", function(file) {
-				    $('#pass-area .info').text('Hello, '+res.username)
-				  });
+				    if(toOverride) {
+				    	$('#pass-area .info').text('Hello, '+res.username);
+					}
+				});
 				slidesDropzone.on("success", function(file) {
-				    $('#pass-area .info').text('Hello, '+res.username+' 檔案已上傳成功！')
-				  });
+				    $('#pass-area .info').text('Hello, '+res.username+' 檔案已上傳成功！');
+				});
 
 			})
 			.fail(function(error) {
