@@ -194,7 +194,7 @@ app.get("/uploadFile",sendUploadFilePage)
 .get("/file/download/:tokenId",function (req,res) {
 	try {
 		originalCollection.findOne({ tokenId: req.params.tokenId },function (err,doc) { 
-			if(!err) {
+			if(!err && doc !== null && doc.fileId !== null && doc.fileId !== undefined) { //found
 				var readstream = gfs.createReadStream({ 
 					_id: doc.fileId,
 					mode: 'r',
