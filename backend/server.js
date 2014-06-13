@@ -297,25 +297,14 @@ form.on('file', function(field, file) {
 				}
 
 				fileOptions._id = uploadFileId;
-				
-				gfs.remove(fileOptions, function (err) {
-				  	if (err) {
-				  		console.log('error');
-				  	}
-				  	else {
-				  		console.log('success');
-					}
+				fileOptions.filename = file.name;
 
-					fileOptions.filename = file.name;
-
-					var writestream = gfs.createWriteStream(fileOptions);
-					fs.createReadStream(file.path).pipe(writestream);
-					writestream.on('close', function (file) {
-					  // do something with `file`
-					  console.log('upload successfully:' + file.filename);
-					  global_res.end("upload complete");
-					});
-
+				var writestream = gfs.createWriteStream(fileOptions);
+				fs.createReadStream(file.path).pipe(writestream);
+				writestream.on('close', function (file) {
+				  // do something with `file`
+				  console.log('upload successfully:' + file.filename);
+				  global_res.end("upload complete");
 				});
 			
 			});	
