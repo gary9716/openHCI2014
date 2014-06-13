@@ -271,11 +271,13 @@ form.on('file', function(field, file) {
 		var uploadFileId = null;
 		if(tokenId) {
 			originalCollection.findOne({ tokenId: tokenId },function (err,doc) {
-				if(!err && doc.fileId) { //found
+				if(!err && 'fileId' in doc) { //found
+					console.log('found:'+doc.fileId);
 					uploadFileId = doc.fileId;
 				}
 				else { //not found
 					uploadFileId = new ObjectId();
+					console.log('new generate:'+uploadFileId);
 					originalCollection.save({ tokenId: tokenId,fileId: uploadFileId },
 											{ w: noAckOfWrite },
 											function (err,record) {
