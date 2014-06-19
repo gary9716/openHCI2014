@@ -374,6 +374,13 @@ function collectEmailsAndRes(res,filterNotUploaded,tokenId,email) {
 			}
 			numOfEmailsRemained--;
 			if(numOfEmailsRemained == 0) {
+				if(filterNotUploaded) {
+					console.log("num of uploaded:" + emailsToRes.length);
+				}
+				else {
+					console.log("num of not uploaded:" + emailsToRes.length);
+				}
+				
 				if(emailsToRes.length > 0) {
 					var resStr = emailsToRes[0];
 					var numOfEmails = emailsToRes.length;
