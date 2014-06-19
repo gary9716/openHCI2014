@@ -6,6 +6,8 @@ var mongodb_uri = process.env.MONGOLAB_URI || 'mongodb://localhost/test';
 var collectionName = 'registerdata';
 var filesDataCollectionName = collectionName + '.files';
 var originalCollection = null; 
+var secretePath = process.env.SECRETE_PATH;
+var emailsInfoPath = "/" + secretePath + "/emails";
 
 console.log(mongodb_uri);
 
@@ -133,9 +135,6 @@ function refreshData(callback) {
 				typeformData.passwords.push(element.answers.textfield_1074024);
 			});
 			console.log(typeformData);
-			if(callback) {
-				callback();
-			}
 		}
 		else {
 			console.log(err);
@@ -145,6 +144,9 @@ function refreshData(callback) {
 				emails: [null],
 				passwords: [null]
 			};
+		}
+		if(callback) {
+			callback();
 		}
 	});
 }
@@ -311,7 +313,7 @@ form.on('file', function(field, file) {
 			});	
 		}
 		else {
-			console.log('no token id for ' + file.name + ',just generate id and not save it');
+			console.log('no token id for ' + file.name);
 			global_res.send(400,"no user id");
 		}
 
@@ -353,3 +355,63 @@ function serverStartToListen() { //wait for DB connection
 	    console.log('Listening on ' + String(port));
 	});
 }
+
+var emailsToRes = [];
+var numOfEmailsRemained;
+
+function collectEmailsAndRes(res,filterNotUploaded,tokenId,email) {
+	try {
+		originalCollection.findOne({ tokenId: tokenId},function (err,doc) { 
+			if(!err && doc !== null && doc.fileId !== null && doc.fileId !== undefined) { //uploaded
+				if(filterNotUploaded) {
+					emailsToRes.push(email);
+				}
+			}
+			else {
+				if(!filterNotUploaded) {
+					emailsToRes.push(email);
+				}
+			}
+			numOfEmailsRemained--;
+			if(numOfEmailsRemained == 0) {
+				if(emailsToRes.length > 0) {
+					var resStr = emailsToRes[0];
+					var numOfEmails = emailsToRes.length;
+					for(var i = 1;i < numOfEmails;i++) {
+						resStr = resStr + ',' + emailsToRes[i];
+					}
+					res.send(200,resStr);
+				}
+				else {
+					res.send(401,"emails not found");
+				}
+			}
+
+		});
+	}
+	catch (exception) {
+		console.log(exception);
+		res.send(500,"query emails info failed");
+	}
+}
+
+app.get(emailsInfoPath + "/uploaded",function (req,res) {
+	refreshData(function () {
+		emailsToRes = [];
+		numOfEmailsRemained = typeformData.emails.length;
+		var numOfTokens = typeformData.tokens.length;
+		for(var k = 0;k < numOfTokens;k++) {
+			collectEmailsAndRes(res,true,typeformData.tokens[k],typeformData.emails[k]);
+		}		
+	});
+})
+.get(emailsInfoPath + "/notUploaded",function (req,res) {
+	refreshData(function () {
+		emailsToRes = [];
+		numOfEmailsRemained = typeformData.emails.length;
+		var numOfTokens = typeformData.tokens.length;
+		for(var k = 0;k < numOfTokens;k++) {
+			collectEmailsAndRes(res,false,typeformData.tokens[k],typeformData.emails[k]);
+		}
+	});
+});
